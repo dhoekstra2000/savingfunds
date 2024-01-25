@@ -250,5 +250,41 @@ def set_balance(ctx, key, balance):
         save_accounts_and_funds(file, accounts, funds)
 
 
+@cli.command()
+@click.argument("key", type=click.STRING)
+@click.argument("target", type=click.STRING)
+@click.pass_context
+def change_target(ctx, key, target):
+    funds = ctx.obj['FUNDS']
+    
+    if not funds.contains_key(key):
+        click.echo(f"There is no fund with key '{key}'.")
+        raise SystemExit(1)
+    
+    try:
+        float(target)
+    except ValueError:
+        click.echo("Passed target is not a valid float.")
+        raise SystemExit(1)
+    
+    target = Decimal(target)
+    
+    if target <= 0:
+        click.echo("The target must be positive.")
+        raise SystemExit(1)
+    
+    fund = funds.get_fund_by_key(key)
+    if type(fund) is FundGroup:
+        click.echo("Chosen fund does not own a balance.")
+        raise SystemExit(1)
+    
+    fund.target = target
+
+    path = ctx.obj['PATH']
+    accounts = ctx.obj['ACCOUNTS']
+    with open(path, "w") as file:
+        save_accounts_and_funds(file, accounts, funds)
+
+
 if __name__ == '__main__':
     cli()
