@@ -84,6 +84,33 @@ class OpenEndFund:
         }
 
 
+class ManualFund:
+    def __init__(self, key, name, account, balance):
+        self.key = key
+        self.name = name
+        self.account = account
+        self.balance = balance
+    
+    @property
+    def target(self):
+        return self.balance
+    
+    def get_as_tree(self, tree):
+        return tree.add(f"[cyan]{self.name}[/cyan]: € {self.balance:.2f}")
+    
+    def get_type(self):
+        return "Manual"
+    
+    def to_dict(self):
+        return {
+            "type": "manual",
+            "key": self.key,
+            "name": self.name,
+            "account": self.account.key,
+            "balance": moneyfmt(self.balance)
+        }
+
+
 class FundGroup:
     def __init__(self, key, name):
         self.name = name

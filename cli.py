@@ -6,7 +6,7 @@ from rich import print
 
 from dataloader import load_accounts_and_funds
 from datasaver import save_funds_data, save_accounts_and_funds
-from funds import Account, FundGroup, FixedEndFund, OpenEndFund
+from funds import Account, FundGroup, FixedEndFund, OpenEndFund, ManualFund
 from reporting import print_account_tree, print_fund_tree, print_funds_table
 
 
@@ -234,6 +234,36 @@ Name: {name}
 Target: € {target:.2f}
 Days: {days}
 """)
+        
+@cli.command()
+@click.argument('parent_group_key', type=click.STRING)
+@click.argument('key', type=click.STRING)
+@click.argument('name', type=click.STRING)
+@click.argument('account_key', type=click.STRING)
+@click.pass_context
+def new_manual_fund(ctx, parent_group_key, key, name, account_key):
+    path = ctx.obj['PATH']
+    accounts = ctx.obj['ACCOUNTS']
+    funds = ctx.obj['FUNDS']
+
+    if account_key not in accounts.keys():
+        click.echo(f"Account with key '{account_key}' not found.")
+        raise SystemExit(1)
+
+    if funds.contains_key(key):
+        click.echo(f"There already exists a fund with key '{key}'.")
+        raise SystemExit(1)
+    
+    new_fund = ManualFund(key, name, accounts[account_key], Decimal(0))
+
+    if not funds.add_fund_to_group(new_fund, parent_group_key):
+        click.echo(f"No fund group with key '{parent_group_key}' found.")
+        raise SystemExit(1)
+
+    with open(path, "w") as file:
+        save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Added new manual fund with key '{key}' and name '{name}'.")
 
 
 @cli.command()

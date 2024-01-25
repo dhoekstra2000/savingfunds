@@ -4,7 +4,7 @@ from decimal import Decimal
 import yaml
 from yaml import BaseLoader
 
-from funds import FixedEndFund, OpenEndFund, FundGroup, Account
+from funds import FixedEndFund, OpenEndFund, FundGroup, Account, ManualFund
 
 def build_fund_tree(fund_data, accounts, group):
     for fnd in fund_data:
@@ -24,6 +24,11 @@ def build_fund_tree(fund_data, accounts, group):
                     fund_group = FundGroup(fnd['key'], fnd['name'])
                     build_fund_tree(fnd['funds'], accounts, fund_group)
                     group.funds[fund_group.key] = fund_group
+                case 'manual':
+                    acct = accounts[fnd['account']]
+                    fund = ManualFund(fnd['key'], fnd['name'], acct, Decimal(fnd['balance']))
+                    acct.funds[fund.key] = fund
+                    group.funds[fund.key] = fund
 
 
 def convert_data_to_accounts_and_funds(data):
