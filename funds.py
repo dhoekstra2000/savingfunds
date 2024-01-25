@@ -13,7 +13,7 @@ class Account:
         return sum([f.balance for _, f in self.funds.items()])
     
     def get_as_tree(self, tree):
-        base = tree.add(f"Account: {self.name}")
+        base = tree.add(f"Account: {self.name} (≥ € {self.get_minimal_balance():.2f})")
         for f in self.funds.values():
             f.get_as_tree(base)
     
