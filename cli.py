@@ -78,6 +78,8 @@ def init(ctx, account_key, account_name, group_key, group_name):
     with open(ctx.obj['PATH'], "w") as file:
         save_funds_data(file, accounts, funds)
 
+    print(f"Initialized new fund collection in '{ctx.obj['PATH']}'.")
+
 
 @cli.command()
 @click.argument('key', type=click.STRING)
@@ -96,6 +98,8 @@ def new_account(ctx, key, name):
     path = ctx.obj['PATH']
     with open(path, "w") as file:
         save_accounts_and_funds(file, accounts, ctx.obj['FUNDS'])
+
+    print(f"Added new account with key '{key}' and name '{name}'.")
 
 
 @cli.command()
@@ -120,6 +124,8 @@ def new_fund_group(ctx, parent_group_key, key, name):
     accounts = ctx.obj['ACCOUNTS']
     with open(path, "w") as file:
         save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Added new fund group with key '{key}' and name '{name}'.")
 
 
 @cli.command()
@@ -165,6 +171,14 @@ def new_fixed_end_fund(ctx, parent_group_key, key, name, account_key, target, ta
 
     with open(path, "w") as file:
         save_accounts_and_funds(file, accounts, funds)
+
+    print(f"""
+Added new fixed-end fund with the following data:
+Key: {key}
+Name: {name}
+Target: € {target:.2f}
+Target date: {target_date}
+""")
 
 
 @cli.command()
@@ -212,6 +226,14 @@ def new_open_end_fund(ctx, parent_group_key, key, name, account_key, target, day
 
     with open(path, "w") as file:
         save_accounts_and_funds(file, accounts, funds)
+    
+        print(f"""
+Added new open-end fund with the following data:
+Key: {key}
+Name: {name}
+Target: € {target:.2f}
+Days: {days}
+""")
 
 
 @cli.command()
@@ -249,6 +271,8 @@ def set_balance(ctx, key, balance):
     with open(path, "w") as file:
         save_accounts_and_funds(file, accounts, funds)
 
+    print(f"Set balance of fund '{fund.name}' to € {balance:.2f}.")
+
 
 @cli.command()
 @click.argument("key", type=click.STRING)
@@ -284,6 +308,8 @@ def change_target(ctx, key, target):
     accounts = ctx.obj['ACCOUNTS']
     with open(path, "w") as file:
         save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed target of fund '{fund.name}' to € {target:.2f}.")
 
 
 if __name__ == '__main__':
