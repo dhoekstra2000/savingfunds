@@ -113,6 +113,18 @@ class FundGroup:
             
         return False
 
+    def get_fund_by_key(self, key):
+        if self.key == key:
+            return self
+        
+        if key in self.funds:
+            return self.funds[key]
+        
+        for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
+            tmp = f.get_fund_by_key(key)
+            if tmp is not None:
+                return tmp
+
     def get_as_tree(self, tree):
         label = f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)"
         if tree is None:
