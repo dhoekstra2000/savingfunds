@@ -32,14 +32,14 @@ def convert_data_to_accounts_and_funds(data):
     for acct in acct_data:
         accounts[acct['key']] = Account(**acct)
 
-    fund_groups = {}
+    root_fund_group = FundGroup('root', 'Root')
     for fund_data in data['funds']:
         key = fund_data['key']
         group = FundGroup(key, fund_data['name'])
         build_fund_tree(fund_data['funds'], accounts, group)
-        fund_groups[key] = group
+        root_fund_group.funds[key] = group
 
-    return accounts, fund_groups
+    return accounts, root_fund_group
 
 
 def load_accounts_and_funds(file):

@@ -4,9 +4,10 @@ from rich import print
 from funds import Account, Fund
 
 def print_fund_tree(funds: dict[str, Fund]):
-    fund_tree = Tree("Fondsen")
-    for g in funds.values():
-        g.get_as_tree(fund_tree)
+    fund_tree = funds.get_as_tree(None)
+    # fund_tree = Tree("Fondsen")
+    # for g in funds.values():
+    #     g.get_as_tree(fund_tree)
 
     print(fund_tree)
 

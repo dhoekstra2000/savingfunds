@@ -92,10 +92,37 @@ class FundGroup:
     def target(self):
         return sum([f.target for f in self.funds.values()])
     
+    def contains_key(self, key):
+        if self.key == key or key in self.funds:
+            return True
+        
+        for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
+            if f.contains_key(key):
+                return True
+            
+        return False
+    
+    def add_fund_to_group(self, fund, group_key):
+        if self.key == group_key:
+            self.funds[fund.key] = fund
+            return True
+        
+        for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
+            if f.add_fund_to_group(fund, group_key):
+                return True
+            
+        return False
+
     def get_as_tree(self, tree):
-        base = tree.add(f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
+        label = f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)"
+        if tree is None:
+            base = Tree(label)
+        else:
+            base = tree.add(label)
         for f in self.funds.values():
             f.get_as_tree(base)
+
+        return base
 
     def to_dict(self):
         return {
