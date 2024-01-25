@@ -7,7 +7,7 @@ from rich import print
 from dataloader import load_accounts_and_funds
 from datasaver import save_funds_data, save_accounts_and_funds
 from funds import Account, FundGroup, FixedEndFund, OpenEndFund
-from reporting import print_account_tree, print_fund_tree
+from reporting import print_account_tree, print_fund_tree, print_funds_table
 
 
 @click.group()
@@ -431,6 +431,14 @@ def withdraw(ctx, key, amount):
         save_accounts_and_funds(file, accounts, funds)
 
     print(f"Withdrawn € {amount:.2f} from '{fund.name}'. New balance: € {fund.balance:.2f}.")
+
+
+@cli.command()
+@click.pass_context
+def funds_table(ctx):
+    funds = ctx.obj['FUNDS']
+    print_funds_table(funds)
+
 
 
 if __name__ == '__main__':

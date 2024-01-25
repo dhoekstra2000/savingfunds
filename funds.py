@@ -42,6 +42,9 @@ class FixedEndFund:
     def get_as_tree(self, tree):
         return tree.add(f"[green]{self.name}[/green]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
     
+    def get_type(self):
+        return "Fixed"
+
     def to_dict(self):
         return {
             "type": "fixed",
@@ -66,6 +69,9 @@ class OpenEndFund:
     def get_as_tree(self, tree):
         return tree.add(f"[blue]{self.name}[/blue]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
     
+    def get_type(self):
+        return "Open"
+
     def to_dict(self):
         return {
             "type": "open",
@@ -92,6 +98,9 @@ class FundGroup:
     def target(self):
         return sum([f.target for f in self.funds.values()])
     
+    def get_type(self):
+        return "Group"
+
     def contains_key(self, key):
         if self.key == key or key in self.funds:
             return True
