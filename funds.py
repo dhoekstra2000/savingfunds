@@ -124,6 +124,22 @@ class FundGroup:
             tmp = f.get_fund_by_key(key)
             if tmp is not None:
                 return tmp
+            
+    def remove_fund_by_key(self, key):
+        if key in self.funds:
+            fund = self.funds[key]
+            if type(fund) is FundGroup:
+                if len(fund.funds) > 0:
+                    raise Exception(f"Fund with key '{key}' is a non-empty fund group.")
+            
+            del self.funds[key]
+            return True
+        
+        for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
+            if f.remove_fund_by_key(key):
+                return True
+            
+        return False
 
     def get_as_tree(self, tree):
         label = f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)"
