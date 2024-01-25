@@ -102,6 +102,30 @@ def new_account(ctx, key, name):
 @click.argument('parent_group_key', type=click.STRING)
 @click.argument('key', type=click.STRING)
 @click.argument('name', type=click.STRING)
+@click.pass_context
+def new_fund_group(ctx, parent_group_key, key, name):
+    funds = ctx.obj['FUNDS']
+
+    if funds.contains_key(key):
+        click.echo(f"There already exists a fund with key '{key}'.")
+        raise SystemExit(1)
+    
+    new_fund = FundGroup(key, name)
+
+    if not funds.add_fund_to_group(new_fund, parent_group_key):
+        click.echo(f"No fund group with key '{parent_group_key}' found.")
+        raise SystemExit(1)
+    
+    path = ctx.obj['PATH']
+    accounts = ctx.obj['ACCOUNTS']
+    with open(path, "w") as file:
+        save_accounts_and_funds(file, accounts, funds)
+
+
+@cli.command()
+@click.argument('parent_group_key', type=click.STRING)
+@click.argument('key', type=click.STRING)
+@click.argument('name', type=click.STRING)
 @click.argument('account_key', type=click.STRING)
 @click.argument('target', type=click.STRING)
 @click.argument('target_date', type=click.DateTime(formats=['%Y-%m-%d']))
