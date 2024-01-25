@@ -1,0 +1,15 @@
+accounts:
+  - name: Test account
+    key: test
+funds:
+  - type: group
+    key: prioriteit
+    name: Prioriteit
+    funds:
+      - type: fixed
+        name: Test
+        key: test
+        account: test
+        balance: 0
+        target: 100
+        target_date: 1970-01-01
