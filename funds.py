@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rich.tree import Tree
 
 from utils import moneyfmt
@@ -39,6 +41,16 @@ class FixedEndFund:
         self.target = target
         self.target_date = target_date
 
+    def remainder_to_save(self):
+        return max(Decimal(0), self.target - self.balance)
+    
+    def daily_saving_rate(self, date):
+        days = (self.target_date - date).days
+        if days <= 0:
+            return self.remainder_to_save()
+        
+        return self.remainder_to_save() / days
+
     def get_as_tree(self, tree):
         return tree.add(f"[green]{self.name}[/green]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
     
@@ -65,6 +77,12 @@ class OpenEndFund:
         self.balance = balance
         self.target = target
         self.days = days
+
+    def remainder_to_save(self):
+        return max(Decimal(0), self.target - self.balance)
+    
+    def daily_saving_rate(self, date):
+        return self.remainder_to_save() / self.days
 
     def get_as_tree(self, tree):
         return tree.add(f"[blue]{self.name}[/blue]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
@@ -95,6 +113,12 @@ class ManualFund:
     def target(self):
         return self.balance
     
+    def remainder_to_save(self):
+        return Decimal(0)
+    
+    def daily_saving_rate(self, date):
+        return Decimal(0)
+    
     def get_as_tree(self, tree):
         return tree.add(f"[cyan]{self.name}[/cyan]: € {self.balance:.2f}")
     
@@ -124,6 +148,12 @@ class FundGroup:
     @property
     def target(self):
         return sum([f.target for f in self.funds.values()])
+
+    def remainder_to_save(self):
+        return max(Decimal(0), self.target - self.balance)
+    
+    def daily_saving_rate(self, date):
+        return sum([f.daily_saving_rate(date) for f in self.funds.values()])
     
     def get_type(self):
         return "Group"

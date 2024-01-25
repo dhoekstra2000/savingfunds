@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from dataloader import load_accounts_and_funds
 from datasaver import save_funds_data, save_accounts_and_funds
 from funds import Account, FundGroup, FixedEndFund, OpenEndFund, ManualFund
 from reporting import print_account_tree, print_fund_tree, print_funds_table
+from utils import moneyfmt
 
 
 @click.group()
@@ -469,6 +471,16 @@ def funds_table(ctx):
     funds = ctx.obj['FUNDS']
     print_funds_table(funds)
 
+
+@cli.command()
+@click.option("--when", default=date.today().isoformat(), type=click.DateTime(["%Y-%m-%d"]))
+@click.pass_context
+def total_daily_saving_rate(ctx, when):
+    when = when.date()
+    funds = ctx.obj['FUNDS']
+    tdsr = funds.daily_saving_rate(when)
+
+    print(f"Total daily saving rate: € {moneyfmt(tdsr, 4)}")
 
 
 if __name__ == '__main__':
