@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 from rich.table import Table
 from rich.tree import Tree
 from rich import print
 
 from funds import Account, Fund, FundGroup
+from utils import moneyfmt
 
 
 def get_flat_funds_dict(funds):
@@ -53,3 +56,27 @@ def print_funds_table(funds):
         table.add_row(key, name, tpe, balance, target)
     
     print(table)
+
+
+def print_savings_amounts_as_tree(funds, amounts):
+    tree = Tree("Root")
+
+    flat_funds = get_flat_funds_dict(funds)
+
+    def build_tree(data, tree):
+        for k, v in data.items():
+            fund = flat_funds[k]
+            if type(v) is tuple:
+                amount, subdata = v
+                if amount == Decimal(0):
+                    continue
+                base = tree.add(f"{fund.name}: € {moneyfmt(amount)}")
+                build_tree(subdata, base)
+            else:
+                if v == Decimal(0):
+                    continue
+                tree.add(f"{fund.name}: € {moneyfmt(v)}")
+    
+    build_tree(amounts, tree)
+
+    print(tree)

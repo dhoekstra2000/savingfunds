@@ -206,6 +206,30 @@ class FundGroup:
                 return True
             
         return False
+    
+    def distribute_extra_savings(self, when, amount):
+        child_dsr = {
+            k: f.daily_saving_rate(when) for k, f in self.funds.items()
+        }
+        total_child_dsr = sum(child_dsr.values())
+        amounts = {}
+        if total_child_dsr > 0:
+            amounts = {
+                k: amount * v/total_child_dsr for k, v in child_dsr.items()
+            }
+        
+            for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
+                subgroup_amounts = f.distribute_extra_savings(when, amounts[f.key])
+                amounts[f.key] = (amounts[f.key], subgroup_amounts)
+
+            for f in filter(lambda f: type(f) is not FundGroup, self.funds.values()):
+                f.balance = f.balance + amounts[f.key]
+
+            return amounts
+
+        return {
+            k: Decimal(0) for k in self.funds
+        }
 
     def get_as_tree(self, tree):
         label = f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)"

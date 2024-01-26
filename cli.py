@@ -8,14 +8,15 @@ from rich import print
 from dataloader import load_accounts_and_funds
 from datasaver import save_funds_data, save_accounts_and_funds
 from funds import Account, FundGroup, FixedEndFund, OpenEndFund, ManualFund
-from reporting import print_account_tree, print_fund_tree, print_funds_table
+from reporting import print_account_tree, print_fund_tree, print_funds_table, print_savings_amounts_as_tree
 from utils import moneyfmt
 
 
 @click.group()
 @click.option('--file', default="./funds.yaml", type=click.Path())
+@click.option('--dry-run', is_flag=True)
 @click.pass_context
-def cli(ctx, file):
+def cli(ctx, file, dry_run):
     ctx.ensure_object(dict)
     
     path = Path(file)
@@ -31,6 +32,7 @@ def cli(ctx, file):
         ctx.obj['ACCOUNTS'] = {}
     
     ctx.obj['PATH'] = path
+    ctx.obj['DRY_RUN'] = dry_run
 
 
 @cli.command("list-accounts")
@@ -60,7 +62,6 @@ def funds_dict(ctx):
 def accounts_dict(ctx):
     accounts = ctx.obj['ACCOUNTS']
     ad = [a.to_dict() for a in accounts.values()]
-
     print(ad)
 
 
@@ -77,8 +78,9 @@ def init(ctx, account_key, account_name, group_key, group_name):
     accounts = [acct.to_dict()]
     funds = [group.to_dict()]
 
-    with open(ctx.obj['PATH'], "w") as file:
-        save_funds_data(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        with open(ctx.obj['PATH'], "w") as file:
+            save_funds_data(file, accounts, funds)
 
     print(f"Initialized new fund collection in '{ctx.obj['PATH']}'.")
 
@@ -97,9 +99,10 @@ def new_account(ctx, key, name):
     new_account = Account(key, name)
     accounts[key] = new_account
 
-    path = ctx.obj['PATH']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, ctx.obj['FUNDS'])
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, ctx.obj['FUNDS'])
 
     print(f"Added new account with key '{key}' and name '{name}'.")
 
@@ -122,10 +125,11 @@ def new_fund_group(ctx, parent_group_key, key, name):
         click.echo(f"No fund group with key '{parent_group_key}' found.")
         raise SystemExit(1)
     
-    path = ctx.obj['PATH']
-    accounts = ctx.obj['ACCOUNTS']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Added new fund group with key '{key}' and name '{name}'.")
 
@@ -171,8 +175,9 @@ def new_fixed_end_fund(ctx, parent_group_key, key, name, account_key, target, ta
         click.echo(f"No fund group with key '{parent_group_key}' found.")
         raise SystemExit(1)
 
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"""
 Added new fixed-end fund with the following data:
@@ -226,8 +231,9 @@ def new_open_end_fund(ctx, parent_group_key, key, name, account_key, target, day
         click.echo(f"No fund group with key '{parent_group_key}' found.")
         raise SystemExit(1)
 
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
     
         print(f"""
 Added new open-end fund with the following data:
@@ -262,8 +268,9 @@ def new_manual_fund(ctx, parent_group_key, key, name, account_key):
         click.echo(f"No fund group with key '{parent_group_key}' found.")
         raise SystemExit(1)
 
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Added new manual fund with key '{key}' and name '{name}'.")
 
@@ -298,10 +305,11 @@ def set_balance(ctx, key, balance):
     
     fund.balance = balance
 
-    path = ctx.obj['PATH']
-    accounts = ctx.obj['ACCOUNTS']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Set balance of fund '{fund.name}' to € {balance:.2f}.")
 
@@ -336,10 +344,11 @@ def change_target(ctx, key, target):
     
     fund.target = target
 
-    path = ctx.obj['PATH']
-    accounts = ctx.obj['ACCOUNTS']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Changed target of fund '{fund.name}' to € {target:.2f}.")
 
@@ -360,10 +369,11 @@ def remove_fund(ctx, key):
         print(e.args[0])
         raise SystemExit(1)
     
-    path = ctx.obj['PATH']
-    accounts = ctx.obj['ACCOUNTS']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Removed fund with key '{key}'.")
 
@@ -384,10 +394,11 @@ def remove_account(ctx, key):
     
     del accounts[key]
     
-    path = ctx.obj['PATH']
-    funds = ctx.obj['FUNDS']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        funds = ctx.obj['FUNDS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Removed account with key '{key}'.")
 
@@ -418,10 +429,11 @@ def deposit(ctx, key, amount):
     fund = funds.get_fund_by_key(key)
     fund.balance += amount
 
-    path = ctx.obj['PATH']
-    accounts = ctx.obj['ACCOUNTS']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Deposited € {amount:.2f} to '{fund.name}'. New balance: € {fund.balance:.2f}.")
 
@@ -457,10 +469,11 @@ def withdraw(ctx, key, amount):
     
     fund.balance -= amount
 
-    path = ctx.obj['PATH']
-    accounts = ctx.obj['ACCOUNTS']
-    with open(path, "w") as file:
-        save_accounts_and_funds(file, accounts, funds)
+    if not ctx.obj['DRY_RUN']:  
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
     print(f"Withdrawn € {amount:.2f} from '{fund.name}'. New balance: € {fund.balance:.2f}.")
 
@@ -482,6 +495,38 @@ def total_daily_saving_rate(ctx, when):
 
     print(f"Total daily saving rate: € {moneyfmt(tdsr, 4)}")
 
+
+@cli.command()
+@click.option("--when", default=date.today().isoformat(), type=click.DateTime(["%Y-%m-%d"]))
+@click.argument("amount", type=click.STRING)
+@click.pass_context
+def distribute_extra(ctx, when, amount):
+    when = when.date()
+    
+    try:
+        float(amount)
+    except ValueError:
+        click.echo("Passed amount is not a valid float.")
+        raise SystemExit(1)
+    
+    amount = Decimal(amount)
+    
+    if amount <= 0:
+        click.echo("The amount must be positive.")
+        raise SystemExit(1)
+    
+    funds = ctx.obj['FUNDS']
+    
+    amounts = funds.distribute_extra_savings(when, amount)
+
+    print("The following amounts are added to the funds:")
+    print_savings_amounts_as_tree(funds, amounts)
+
+    if not ctx.obj['DRY_RUN']:  
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
 if __name__ == '__main__':
     cli()
