@@ -528,5 +528,45 @@ def distribute_extra(ctx, when, amount):
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
+
+@cli.command()
+@click.option("--when", default=date.today().isoformat(), type=click.DateTime(["%Y-%m-%d"]))
+@click.argument("key", type=click.STRING)
+@click.argument("amount", type=click.STRING)
+@click.pass_context
+def distribute_interest(ctx, when, key, amount):
+    when = when.date()
+
+    accounts = ctx.obj['ACCOUNTS']
+
+    if key not in accounts:
+        click.echo(f"Account with key '{key}' not found.")
+        raise SystemExit(1)
+    
+    try:
+        float(amount)
+    except ValueError:
+        click.echo("Passed amount is not a valid float.")
+        raise SystemExit(1)
+    
+    amount = Decimal(amount)
+    
+    if amount <= 0:
+        click.echo("The amount must be positive.")
+        raise SystemExit(1)
+    
+    account = accounts[key]
+    amounts = account.distribute_interest(when, amount)
+
+    funds = ctx.obj['FUNDS']
+    print(f"Distributing interest of account '{account.name}' as follows:")
+    print_savings_amounts_as_tree(funds, amounts)
+
+    if not ctx.obj['DRY_RUN']:  
+        path = ctx.obj['PATH']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+
 if __name__ == '__main__':
     cli()

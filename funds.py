@@ -14,6 +14,48 @@ class Account:
     def get_minimal_balance(self):
         return sum([f.balance for _, f in self.funds.items()])
     
+    def has_manual_funds(self):
+        return any([type(f) is ManualFund for f in self.funds.values()])
+    
+    def distribute_interest(self, date, amount):
+        manual_funds = {
+            k: f for k, f in self.funds.items() if type(f) is ManualFund
+        }
+        non_manual_funds = {
+            k: f for k, f in self.funds.items() if type(f) is not ManualFund
+        }
+        manual_funds_balance = sum(map(lambda f: f.balance, manual_funds.values()))
+        non_manual_funds_balance = sum(map(lambda f: f.balance, non_manual_funds.values()))
+        
+        manual_funds_amount = None
+        non_manual_funds_amount = None
+        if manual_funds_balance + non_manual_funds_balance > 0:
+            manual_funds_amount = amount * manual_funds_balance / (manual_funds_balance + non_manual_funds_balance)
+            non_manual_funds_amount = amount - manual_funds_amount
+        else:
+            manual_funds_amount = Decimal(0)
+            non_manual_funds_amount = amount
+
+        child_dsr = {
+            k: f.daily_saving_rate(date) for k, f in non_manual_funds.items()
+        }
+        total_dsr = sum(child_dsr.values())
+        amounts = {
+            k: non_manual_funds_amount * v / total_dsr for k, v in child_dsr.items()
+        }
+
+        for k, f in manual_funds.items():
+            print(f"Checking: {f.name}")
+            if manual_funds_amount > 0:
+                amounts[k] = f.balance * manual_funds_amount / manual_funds_balance
+            else:
+                amounts[k] = Decimal(0)
+
+        for k, v in amounts.items():
+            self.funds[k].balance += v
+
+        return amounts
+    
     def get_as_tree(self, tree):
         base = tree.add(f"Account: {self.name} (≥ € {self.get_minimal_balance():.2f})")
         for f in self.funds.values():
