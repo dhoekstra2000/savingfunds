@@ -40,9 +40,17 @@ class Account:
             k: f.daily_saving_rate(date) for k, f in non_manual_funds.items()
         }
         total_dsr = sum(child_dsr.values())
-        amounts = {
-            k: non_manual_funds_amount * v / total_dsr for k, v in child_dsr.items()
-        }
+        amounts = {}
+        if total_dsr == Decimal(0):
+            manual_funds_amount = amount
+        else:
+            amounts = {
+                k: non_manual_funds_amount * v / total_dsr for k, v in child_dsr.items()
+            }
+        
+        amounts = { k: min(v, self.funds[k].remainder_to_save()) for k, v in amounts.items() }
+        remainder = amount - sum(amounts.values())
+        manual_funds_amount += remainder
 
         for k, f in manual_funds.items():
             print(f"Checking: {f.name}")
@@ -54,7 +62,9 @@ class Account:
         for k, v in amounts.items():
             self.funds[k].balance += v
 
-        return amounts
+        remainder = amount - sum(amounts.values())
+
+        return amounts, remainder
     
     def get_as_tree(self, tree):
         base = tree.add(f"Account: {self.name} (≥ € {self.get_minimal_balance():.2f})")
@@ -257,21 +267,22 @@ class FundGroup:
         amounts = {}
         if total_child_dsr > 0:
             amounts = {
-                k: amount * v/total_child_dsr for k, v in child_dsr.items()
+                k: min(amount * v/total_child_dsr, self.funds[k].remainder_to_save()) for k, v in child_dsr.items()
             }
+            remainder = amount - sum(amounts.values())
         
             for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
-                subgroup_amounts = f.distribute_extra_savings(when, amounts[f.key])
+                subgroup_amounts, _ = f.distribute_extra_savings(when, amounts[f.key])
                 amounts[f.key] = (amounts[f.key], subgroup_amounts)
 
             for f in filter(lambda f: type(f) is not FundGroup, self.funds.values()):
                 f.balance = f.balance + amounts[f.key]
 
-            return amounts
+            return amounts, remainder
 
         return {
             k: Decimal(0) for k in self.funds
-        }
+        }, amount
 
     def get_as_tree(self, tree):
         label = f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)"

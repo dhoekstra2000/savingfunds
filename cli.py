@@ -517,10 +517,15 @@ def distribute_extra(ctx, when, amount):
     
     funds = ctx.obj['FUNDS']
     
-    amounts = funds.distribute_extra_savings(when, amount)
+    amounts, remainder = funds.distribute_extra_savings(when, amount)
 
-    print("The following amounts are added to the funds:")
-    print_savings_amounts_as_tree(funds, amounts)
+    if amount != remainder:
+        print("The following amounts are added to the funds:")
+        print_savings_amounts_as_tree(funds, amounts)
+    else:
+        print("No funds to fill!")
+    
+    print(f"Remaining amounts: € {remainder:.2f}")
 
     if not ctx.obj['DRY_RUN']:  
         path = ctx.obj['PATH']
@@ -556,11 +561,16 @@ def distribute_interest(ctx, when, key, amount):
         raise SystemExit(1)
     
     account = accounts[key]
-    amounts = account.distribute_interest(when, amount)
+    amounts, remainder = account.distribute_interest(when, amount)
 
     funds = ctx.obj['FUNDS']
-    print(f"Distributing interest of account '{account.name}' as follows:")
-    print_savings_amounts_as_tree(funds, amounts)
+    if remainder != amount:
+        print(f"Distributing interest of account '{account.name}' as follows:")
+        print_savings_amounts_as_tree(funds, amounts)
+    else:
+        print(f"No accounts to distribute to.")
+
+    print(f"Remaining interest: € {remainder:.2f}.")
 
     if not ctx.obj['DRY_RUN']:  
         path = ctx.obj['PATH']
