@@ -3,20 +3,20 @@ from decimal import Decimal
 import click
 
 from commands.utils import (
-    validate_existing_fund_key,
     validate_amount,
     validate_existing_account_key,
+    validate_existing_fund_key,
     validate_fund_type,
 )
 from datasaver import save_accounts_and_funds
 from funds import (
-    Fund,
-    BalanceFund,
-    TargetFund,
     AccountFund,
+    BalanceFund,
     FixedEndFund,
-    OpenEndFund,
+    Fund,
     FundGroup,
+    OpenEndFund,
+    TargetFund,
 )
 
 
@@ -172,10 +172,10 @@ def change_monthly_factor(ctx, key, factor):
 @click.argument("account_key", type=click.STRING)
 @click.pass_context
 def change_account(ctx, key, account_key):
-    funds = ctx.obj['FUNDS']
+    funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
-    accounts = ctx.obj['ACCOUNTS']
+    accounts = ctx.obj["ACCOUNTS"]
     validate_existing_account_key(accounts, account_key)
 
     fund = funds.get_fund_by_key(key)

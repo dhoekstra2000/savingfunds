@@ -6,13 +6,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
-from funds import (
-    Account,
-    Fund,
-    FundGroup,
-    FixedEndFund,
-    OpenEndFund,
-)
+from funds import Account, FixedEndFund, Fund, FundGroup, OpenEndFund
 from utils import moneyfmt
 
 

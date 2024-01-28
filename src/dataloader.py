@@ -4,7 +4,7 @@ from decimal import Decimal
 import yaml
 from yaml import BaseLoader
 
-from funds import FixedEndFund, OpenEndFund, FundGroup, Account, ManualFund
+from funds import Account, FixedEndFund, FundGroup, ManualFund, OpenEndFund
 
 
 def build_fund_tree(fund_data, accounts, group):

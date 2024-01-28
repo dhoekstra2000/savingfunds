@@ -1,12 +1,12 @@
-from decimal import Decimal
 from datetime import date
+from decimal import Decimal
 
 import click
 from rich.markdown import Markdown
 
 from commands.utils import validate_amount, validate_existing_account_key
 from datasaver import save_accounts_and_funds
-from reporting import print_savings_report, print_savings_amounts_as_tree
+from reporting import print_savings_amounts_as_tree, print_savings_report
 from utils import moneyfmt
 
 

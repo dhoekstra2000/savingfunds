@@ -5,9 +5,9 @@ import click
 from commands.utils import validate_existing_fund_key
 from reporting import (
     print_account_tree,
+    print_fund_details,
     print_fund_tree,
     print_funds_table,
-    print_fund_details,
 )
 from utils import moneyfmt
 

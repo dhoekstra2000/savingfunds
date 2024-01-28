@@ -8,14 +8,8 @@ from commands.utils import (
     validate_new_account_key,
     validate_new_fund_key,
 )
-from datasaver import save_funds_data, save_accounts_and_funds
-from funds import (
-    Account,
-    FundGroup,
-    FixedEndFund,
-    OpenEndFund,
-    ManualFund,
-)
+from datasaver import save_accounts_and_funds, save_funds_data
+from funds import Account, FixedEndFund, FundGroup, ManualFund, OpenEndFund
 
 
 @click.command()
