@@ -4,11 +4,12 @@ from pathlib import Path
 
 import click
 from rich import print
+from rich.markdown import Markdown
 
 from dataloader import load_accounts_and_funds
 from datasaver import save_funds_data, save_accounts_and_funds
 from funds import Account, FundGroup, FixedEndFund, OpenEndFund, ManualFund
-from reporting import print_account_tree, print_fund_tree, print_funds_table, print_savings_amounts_as_tree
+from reporting import print_account_tree, print_fund_tree, print_funds_table, print_savings_amounts_as_tree, print_savings_amounts_for_accounts, print_savings_report
 from utils import moneyfmt
 
 
@@ -519,17 +520,20 @@ def distribute_extra(ctx, when, amount):
     
     amounts, remainder = funds.distribute_extra_savings(when, amount)
 
+    markdown = f"""
+Distributing extra amount: € {amount:.2f}
+
+Remaining amount: € {remainder:.2f}
+"""
+
+    accounts = ctx.obj['ACCOUNTS']
     if amount != remainder:
-        print("The following amounts are added to the funds:")
-        print_savings_amounts_as_tree(funds, amounts)
+        print_savings_report(accounts, funds, amounts, Markdown(markdown))
     else:
         print("No funds to fill!")
-    
-    print(f"Remaining amounts: € {remainder:.2f}")
 
     if not ctx.obj['DRY_RUN']:  
         path = ctx.obj['PATH']
-        accounts = ctx.obj['ACCOUNTS']
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 

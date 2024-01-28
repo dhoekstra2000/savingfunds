@@ -1,8 +1,10 @@
 from decimal import Decimal
 
+from rich import print
+from rich.columns import Columns
+from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
-from rich import print
 
 from funds import Account, Fund, FundGroup
 from utils import moneyfmt
@@ -59,6 +61,11 @@ def print_funds_table(funds):
 
 
 def print_savings_amounts_as_tree(funds, amounts):
+    tree = tree_for_savings_amounts_as_tree(funds, amounts)
+    print(tree)
+
+
+def tree_for_savings_amounts_as_tree(funds, amounts):
     tree = Tree("Root")
 
     flat_funds = get_flat_funds_dict(funds)
@@ -79,4 +86,48 @@ def print_savings_amounts_as_tree(funds, amounts):
     
     build_tree(amounts, tree)
 
+    return tree
+
+
+def print_savings_amounts_for_accounts(accounts, amounts):
+    tree = tree_for_savings_amounts_for_accounts(accounts, amounts)
     print(tree)
+
+
+def tree_for_savings_amounts_for_accounts(accounts, amounts):
+    tree = Tree("Root")
+
+    def flatten_amounts(amounts):
+        flat_amounts = {}
+        for k, v in amounts.items():
+            if type(v) is tuple:
+                amount, subamounts = v
+                flat_amounts[k] = amount
+                flat_subamounts = flatten_amounts(subamounts)
+                flat_amounts = {**flat_amounts, **flat_subamounts}
+            else:
+                flat_amounts[k] = v
+        
+        return flat_amounts
+
+    flat_amounts = flatten_amounts(amounts)
+    for _, acct in accounts.items():
+        acct_amount = sum([v for k, v in flat_amounts.items() if k in acct.funds])
+        tree.add(f"{acct.name}: € {moneyfmt(acct_amount)}.")
+
+    return tree
+
+
+def print_savings_report(accounts, funds, amounts, info_contents):
+    funds_tree = tree_for_savings_amounts_as_tree(funds, amounts)
+    accounts_tree = tree_for_savings_amounts_for_accounts(accounts, amounts)
+
+    info_panel = Panel(info_contents, title="Information")
+    funds_panel = Panel(funds_tree, title="Funds distribution")
+    accts_panel = Panel(accounts_tree, title="Accounts increase")
+
+    print(info_panel)
+
+    columns = Columns([funds_panel, accts_panel], expand=True)
+
+    print(columns)
