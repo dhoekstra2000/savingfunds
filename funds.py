@@ -49,11 +49,10 @@ class Account:
             }
         
         amounts = { k: min(v, self.funds[k].remainder_to_save()) for k, v in amounts.items() }
-        remainder = amount - sum(amounts.values())
+        remainder = non_manual_funds_amount - sum(amounts.values())
         manual_funds_amount += remainder
 
         for k, f in manual_funds.items():
-            print(f"Checking: {f.name}")
             if manual_funds_amount > 0:
                 amounts[k] = f.balance * manual_funds_amount / manual_funds_balance
             else:
