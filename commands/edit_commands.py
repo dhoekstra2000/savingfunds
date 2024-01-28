@@ -4,7 +4,7 @@ import click
 
 from commands.utils import validate_existing_fund_key, validate_amount, validate_fund_type
 from datasaver import save_accounts_and_funds
-from funds import BalanceFund, TargetFund
+from funds import BalanceFund, TargetFund, FixedEndFund, OpenEndFund
 
 
 @click.command()
@@ -55,3 +55,27 @@ def change_target(ctx, key, target):
             save_accounts_and_funds(file, accounts, funds)
 
     print(f"Changed target of fund '{fund.name}' to € {target:.2f}.")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument('target_date', type=click.DateTime(formats=['%Y-%m-%d']))
+@click.pass_context
+def change_target_date(ctx, key, target_date):
+    target_date = target_date.date()
+
+    funds = ctx.obj['FUNDS']
+    validate_existing_fund_key(funds, key)
+
+    fund = funds.get_fund_by_key(key)
+    validate_fund_type(fund, FixedEndFund)
+
+    fund.target_date = target_date
+
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed target date of fund '{fund.name}' to {target_date}.")
