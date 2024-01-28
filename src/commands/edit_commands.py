@@ -193,3 +193,31 @@ def change_account(ctx, key, account_key):
             save_accounts_and_funds(file, accounts, funds)
 
     print(f"Changed account of fund '{fund.name}' to '{account.name}'.")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument("parent_key", type=click.STRING)
+@click.pass_context
+def change_parent_group(ctx, key, parent_key):
+    funds = ctx.obj["FUNDS"]
+    validate_existing_fund_key(funds, key)
+    validate_existing_fund_key(funds, parent_key)
+
+    new_parent_fund = funds.get_fund_by_key(parent_key)
+    validate_fund_type(new_parent_fund, FundGroup)
+
+    fund = funds.get_fund_by_key(key)
+    if key == "root":
+        validate_fund_type(fund, FundGroup)
+
+    funds.remove_fund_by_key(key)
+    new_parent_fund.funds[fund.key] = fund
+
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed parent of fund '{fund.name}' to '{new_parent_fund.name}'")

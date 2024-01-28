@@ -13,6 +13,7 @@ from commands.edit_commands import (
     change_account,
     change_monthly_factor,
     change_name,
+    change_parent_group,
     change_saving_days,
     change_target,
     change_target_date,
@@ -82,6 +83,7 @@ cli.add_command(change_saving_days)
 cli.add_command(change_name)
 cli.add_command(change_monthly_factor)
 cli.add_command(change_account)
+cli.add_command(change_parent_group)
 
 cli.add_command(remove_account)
 cli.add_command(remove_fund)
