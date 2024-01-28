@@ -2,9 +2,9 @@ from decimal import Decimal
 
 import click
 
-from commands.utils import validate_existing_fund_key, validate_amount
+from commands.utils import validate_existing_fund_key, validate_amount, validate_fund_type
 from datasaver import save_accounts_and_funds
-from funds import FundGroup
+from funds import BalanceFund, TargetFund
 
 
 @click.command()
@@ -19,9 +19,7 @@ def set_balance(ctx, key, balance):
     balance = validate_amount(balance)
     
     fund = funds.get_fund_by_key(key)
-    if type(fund) is FundGroup:
-        click.echo("Chosen fund does not own a balance.")
-        raise SystemExit(1)
+    validate_fund_type(fund, BalanceFund)
     
     fund.balance = balance
 
@@ -46,9 +44,7 @@ def change_target(ctx, key, target):
     target = validate_amount(target)
     
     fund = funds.get_fund_by_key(key)
-    if type(fund) is FundGroup:
-        click.echo("Chosen fund does not own a target.")
-        raise SystemExit(1)
+    validate_fund_type(fund, TargetFund)
     
     fund.target = target
 

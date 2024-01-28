@@ -41,3 +41,8 @@ def validate_new_fund_key(funds, key):
         click.echo(f"There already exists a fund with key '{key}'.")
         raise SystemExit(1)
     
+
+def validate_fund_type(fund, T):
+    if not isinstance(fund, T):
+        click.echo(f"The fund does not have the right type.")
+        raise SystemExit(1)

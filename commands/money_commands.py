@@ -2,8 +2,9 @@ from decimal import Decimal
 
 import click
 
-from commands.utils import validate_amount, validate_existing_fund_key
+from commands.utils import validate_amount, validate_existing_fund_key, validate_fund_type
 from datasaver import save_accounts_and_funds
+from funds import BalanceFund
 
 
 @click.command()
@@ -18,6 +19,8 @@ def deposit(ctx, key, amount):
     amount = validate_amount(amount)
     
     fund = funds.get_fund_by_key(key)
+    validate_fund_type(fund, BalanceFund)
+    
     fund.balance += amount
 
     if not ctx.obj['DRY_RUN']:
@@ -38,13 +41,10 @@ def withdraw(ctx, key, amount):
     
     validate_existing_fund_key(funds, key)
     
-    if not funds.contains_key(key):
-        click.echo(f"There is no fund with key '{key}'.")
-        raise SystemExit(1)
-    
     amount = validate_amount(amount)
     
     fund = funds.get_fund_by_key(key)
+    validate_fund_type(fund, BalanceFund)
     
     if amount > fund.balance:
         click.echo(f"The amount is more than the balance (€ {fund.balance:.2f}). You cannot overdraw funds.")
