@@ -133,7 +133,11 @@ class OpenEndFund:
         return max(Decimal(0), self.target - self.balance)
     
     def daily_saving_rate(self, date):
-        return self.remainder_to_save() / self.days
+        return self.target / self.days
+    
+    def ndays_saving(self, date, days):
+        dsr = self.daily_saving_rate(date)
+        return min(dsr * days, self.remainder_to_save())
 
     def get_as_tree(self, tree):
         return tree.add(f"[blue]{self.name}[/blue]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
