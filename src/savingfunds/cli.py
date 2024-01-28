@@ -3,13 +3,13 @@ from pathlib import Path
 
 import click
 
-from commands.delete_commands import remove_account, remove_fund
-from commands.distribution_commands import (
+from savingfunds.commands.delete_commands import remove_account, remove_fund
+from savingfunds.commands.distribution_commands import (
     distribute_extra,
     distribute_interest,
     distribute_monthly,
 )
-from commands.edit_commands import (
+from savingfunds.commands.edit_commands import (
     change_account,
     change_monthly_factor,
     change_name,
@@ -19,8 +19,8 @@ from commands.edit_commands import (
     change_target_date,
     set_balance,
 )
-from commands.money_commands import deposit, withdraw
-from commands.new_commands import (
+from savingfunds.commands.money_commands import deposit, withdraw
+from savingfunds.commands.new_commands import (
     init,
     new_account,
     new_fixed_end_fund,
@@ -28,14 +28,14 @@ from commands.new_commands import (
     new_manual_fund,
     new_open_end_fund,
 )
-from commands.reporting_commands import (
+from savingfunds.commands.reporting_commands import (
     fund_details,
     funds_table,
     list_accounts,
     list_funds,
     total_daily_saving_rate,
 )
-from dataloader import load_accounts_and_funds
+from savingfunds.dataloader import load_accounts_and_funds
 
 getcontext().prec = 100
 
@@ -94,7 +94,3 @@ cli.add_command(withdraw)
 cli.add_command(distribute_extra)
 cli.add_command(distribute_interest)
 cli.add_command(distribute_monthly)
-
-
-if __name__ == "__main__":
-    cli()

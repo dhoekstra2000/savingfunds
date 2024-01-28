@@ -2,14 +2,20 @@ from decimal import Decimal
 
 import click
 
-from commands.utils import (
+from savingfunds.commands.utils import (
     validate_amount,
     validate_existing_account_key,
     validate_new_account_key,
     validate_new_fund_key,
 )
-from datasaver import save_accounts_and_funds, save_funds_data
-from funds import Account, FixedEndFund, FundGroup, ManualFund, OpenEndFund
+from savingfunds.datasaver import save_accounts_and_funds, save_funds_data
+from savingfunds.funds import (
+    Account,
+    FixedEndFund,
+    FundGroup,
+    ManualFund,
+    OpenEndFund,
+)
 
 
 @click.command()

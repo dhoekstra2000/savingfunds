@@ -6,8 +6,14 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
-from funds import Account, FixedEndFund, Fund, FundGroup, OpenEndFund
-from utils import moneyfmt
+from savingfunds.funds import (
+    Account,
+    FixedEndFund,
+    Fund,
+    FundGroup,
+    OpenEndFund,
+)
+from savingfunds.utils import moneyfmt
 
 
 def get_flat_funds_dict(funds):

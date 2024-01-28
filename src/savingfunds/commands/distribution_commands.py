@@ -4,10 +4,16 @@ from decimal import Decimal
 import click
 from rich.markdown import Markdown
 
-from commands.utils import validate_amount, validate_existing_account_key
-from datasaver import save_accounts_and_funds
-from reporting import print_savings_amounts_as_tree, print_savings_report
-from utils import moneyfmt
+from savingfunds.commands.utils import (
+    validate_amount,
+    validate_existing_account_key,
+)
+from savingfunds.datasaver import save_accounts_and_funds
+from savingfunds.reporting import (
+    print_savings_amounts_as_tree,
+    print_savings_report,
+)
+from savingfunds.utils import moneyfmt
 
 
 @click.command()

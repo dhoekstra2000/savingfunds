@@ -7,7 +7,7 @@ from rich.console import Group
 from rich.progress_bar import ProgressBar
 from rich.tree import Tree
 
-from utils import moneyfmt
+from savingfunds.utils import moneyfmt
 
 
 class Account:
