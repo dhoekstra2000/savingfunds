@@ -53,7 +53,7 @@ def print_funds_table(funds):
         name = fund.name
         tpe = fund.get_type()
         balance = f"{fund.balance:.2f}"
-        target = f"{fund.balance:.2f}"
+        target = f"{fund.target:.2f}"
 
         table.add_row(key, name, tpe, balance, target)
     
