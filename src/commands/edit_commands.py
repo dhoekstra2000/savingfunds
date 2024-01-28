@@ -2,9 +2,20 @@ from decimal import Decimal
 
 import click
 
-from commands.utils import validate_existing_fund_key, validate_amount, validate_fund_type
+from commands.utils import (
+    validate_existing_fund_key,
+    validate_amount,
+    validate_fund_type,
+)
 from datasaver import save_accounts_and_funds
-from funds import Fund, BalanceFund, TargetFund, FixedEndFund, OpenEndFund, FundGroup
+from funds import (
+    Fund,
+    BalanceFund,
+    TargetFund,
+    FixedEndFund,
+    OpenEndFund,
+    FundGroup,
+)
 
 
 @click.command()
@@ -12,20 +23,20 @@ from funds import Fund, BalanceFund, TargetFund, FixedEndFund, OpenEndFund, Fund
 @click.argument("balance", type=click.STRING)
 @click.pass_context
 def set_balance(ctx, key, balance):
-    funds = ctx.obj['FUNDS']
-    
+    funds = ctx.obj["FUNDS"]
+
     validate_existing_fund_key(funds, key)
-    
+
     balance = validate_amount(balance)
-    
+
     fund = funds.get_fund_by_key(key)
     validate_fund_type(fund, BalanceFund)
-    
+
     fund.balance = balance
 
-    if not ctx.obj['DRY_RUN']:
-        path = ctx.obj['PATH']
-        accounts = ctx.obj['ACCOUNTS']
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
@@ -37,7 +48,7 @@ def set_balance(ctx, key, balance):
 @click.argument("name", type=click.STRING)
 @click.pass_context
 def change_name(ctx, key, name):
-    funds = ctx.obj['FUNDS']
+    funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
     fund = funds.get_fund_by_key(key)
@@ -45,9 +56,9 @@ def change_name(ctx, key, name):
     old_name = fund.name
     fund.name = name
 
-    if not ctx.obj['DRY_RUN']:
-        path = ctx.obj['PATH']
-        accounts = ctx.obj['ACCOUNTS']
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
@@ -59,20 +70,20 @@ def change_name(ctx, key, name):
 @click.argument("target", type=click.STRING)
 @click.pass_context
 def change_target(ctx, key, target):
-    funds = ctx.obj['FUNDS']
-    
+    funds = ctx.obj["FUNDS"]
+
     validate_existing_fund_key(funds, key)
-    
+
     target = validate_amount(target)
-    
+
     fund = funds.get_fund_by_key(key)
     validate_fund_type(fund, TargetFund)
-    
+
     fund.target = target
 
-    if not ctx.obj['DRY_RUN']:
-        path = ctx.obj['PATH']
-        accounts = ctx.obj['ACCOUNTS']
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
@@ -81,12 +92,12 @@ def change_target(ctx, key, target):
 
 @click.command()
 @click.argument("key", type=click.STRING)
-@click.argument('target_date', type=click.DateTime(formats=['%Y-%m-%d']))
+@click.argument("target_date", type=click.DateTime(formats=["%Y-%m-%d"]))
 @click.pass_context
 def change_target_date(ctx, key, target_date):
     target_date = target_date.date()
 
-    funds = ctx.obj['FUNDS']
+    funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
     fund = funds.get_fund_by_key(key)
@@ -94,9 +105,9 @@ def change_target_date(ctx, key, target_date):
 
     fund.target_date = target_date
 
-    if not ctx.obj['DRY_RUN']:
-        path = ctx.obj['PATH']
-        accounts = ctx.obj['ACCOUNTS']
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
@@ -108,7 +119,7 @@ def change_target_date(ctx, key, target_date):
 @click.argument("days", type=click.IntRange(0))
 @click.pass_context
 def change_saving_days(ctx, key, days):
-    funds = ctx.obj['FUNDS']
+    funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
     fund = funds.get_fund_by_key(key)
@@ -116,9 +127,9 @@ def change_saving_days(ctx, key, days):
 
     fund.days = days
 
-    if not ctx.obj['DRY_RUN']:
-        path = ctx.obj['PATH']
-        accounts = ctx.obj['ACCOUNTS']
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
@@ -130,7 +141,7 @@ def change_saving_days(ctx, key, days):
 @click.argument("factor", type=click.STRING)
 @click.pass_context
 def change_monthly_factor(ctx, key, factor):
-    funds = ctx.obj['FUNDS']
+    funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
     factor = validate_amount(factor)
@@ -143,10 +154,12 @@ def change_monthly_factor(ctx, key, factor):
 
     fund.monthly_factor = factor
 
-    if not ctx.obj['DRY_RUN']:
-        path = ctx.obj['PATH']
-        accounts = ctx.obj['ACCOUNTS']
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
-    print(f"Monthly factor of fund group '{fund.name}' is set to {str(factor)}.")
+    print(
+        f"Monthly factor of fund group '{fund.name}' is set to {str(factor)}."
+    )

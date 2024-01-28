@@ -6,7 +6,13 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
-from funds import Account, Fund, FundGroup, FixedEndFund, OpenEndFund, ManualFund
+from funds import (
+    Account,
+    Fund,
+    FundGroup,
+    FixedEndFund,
+    OpenEndFund,
+)
 from utils import moneyfmt
 
 
@@ -19,7 +25,7 @@ def get_flat_funds_dict(funds):
             flat_funds[k] = f
             sub_flat_funds = get_flat_funds_dict(f)
             flat_funds = {**flat_funds, **sub_flat_funds}
-    
+
     return flat_funds
 
 
@@ -47,7 +53,7 @@ def print_funds_table(funds):
     table.add_column("Target (€)", justify="right")
 
     flat_funds = get_flat_funds_dict(funds)
-    
+
     for fund in flat_funds.values():
         key = fund.key
         name = fund.name
@@ -56,7 +62,7 @@ def print_funds_table(funds):
         target = f"{fund.target:.2f}"
 
         table.add_row(key, name, tpe, balance, target)
-    
+
     print(table)
 
 
@@ -83,7 +89,7 @@ def tree_for_savings_amounts_as_tree(funds, amounts):
                 if v == Decimal(0):
                     continue
                 tree.add(f"{fund.name}: € {moneyfmt(v)}")
-    
+
     build_tree(amounts, tree)
 
     return tree
@@ -107,12 +113,14 @@ def tree_for_savings_amounts_for_accounts(accounts, amounts):
                 flat_amounts = {**flat_amounts, **flat_subamounts}
             else:
                 flat_amounts[k] = v
-        
+
         return flat_amounts
 
     flat_amounts = flatten_amounts(amounts)
     for _, acct in accounts.items():
-        acct_amount = sum([v for k, v in flat_amounts.items() if k in acct.funds])
+        acct_amount = sum(
+            [v for k, v in flat_amounts.items() if k in acct.funds]
+        )
         tree.add(f"{acct.name}: € {moneyfmt(acct_amount)}.")
 
     return tree
@@ -143,8 +151,8 @@ def print_fund_details(fund):
     table.add_row("Key", fund.key)
     table.add_row("Name", fund.name)
     table.add_row("Balance", "€ " + moneyfmt(fund.balance))
-    table.add_row("Target", "€ "+moneyfmt(fund.target))
-    table.add_row("Remainder", "€ "+moneyfmt(fund.remainder_to_save()))
+    table.add_row("Target", "€ " + moneyfmt(fund.target))
+    table.add_row("Remainder", "€ " + moneyfmt(fund.remainder_to_save()))
 
     if isinstance(fund, FixedEndFund):
         table.add_row("Target date", f"{fund.target_date}")

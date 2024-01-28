@@ -1,6 +1,7 @@
-from rich import print
-
-from dataloader import load_accounts_and_funds, convert_data_to_accounts_and_funds
+from dataloader import (
+    load_accounts_and_funds,
+    convert_data_to_accounts_and_funds,
+)
 from reporting import print_fund_tree
 
 with open("funds.yaml", "r") as f:
@@ -12,7 +13,7 @@ with open("funds.yaml", "r") as f:
 
     new_data = {
         "accounts": [a.to_dict() for a in accounts.values()],
-        "funds": fd
+        "funds": fd,
     }
 
     accounts2, funds2 = convert_data_to_accounts_and_funds(new_data)
