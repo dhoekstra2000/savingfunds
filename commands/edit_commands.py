@@ -4,7 +4,7 @@ import click
 
 from commands.utils import validate_existing_fund_key, validate_amount, validate_fund_type
 from datasaver import save_accounts_and_funds
-from funds import Fund, BalanceFund, TargetFund, FixedEndFund, OpenEndFund
+from funds import Fund, BalanceFund, TargetFund, FixedEndFund, OpenEndFund, FundGroup
 
 
 @click.command()
@@ -123,3 +123,30 @@ def change_saving_days(ctx, key, days):
             save_accounts_and_funds(file, accounts, funds)
 
     print(f"Changed saving days of fund '{fund.name}' to {days}.")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument("factor", type=click.STRING)
+@click.pass_context
+def change_monthly_factor(ctx, key, factor):
+    funds = ctx.obj['FUNDS']
+    validate_existing_fund_key(funds, key)
+
+    factor = validate_amount(factor)
+    if factor < Decimal(1):
+        click.echo("Factor must be at least 1.")
+        raise SystemExit(1)
+
+    fund = funds.get_fund_by_key(key)
+    validate_fund_type(fund, FundGroup)
+
+    fund.monthly_factor = factor
+
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Monthly factor of fund group '{fund.name}' is set to {str(factor)}.")
