@@ -302,6 +302,9 @@ class FundGroup:
         }, amount
 
     def distribute_monthly_savings_tld(self, year, month, amount):
+        _, days_in_month = calendar.monthrange(year, month)
+        when = date(year, month, 1)
+        
         amounts = {}
         deficits = Decimal(0)
         remainder = amount
@@ -309,8 +312,43 @@ class FundGroup:
         for k, f in self.funds.items():
             subamounts, new_remainder, deficit = f.distribute_monthly_savings(year, month, remainder)
             deficits += deficit
-            amounts[k] = (remainder - new_remainder ,subamounts)
+            amounts[k] = (remainder - new_remainder, subamounts)
             remainder = new_remainder
+
+        def upfactor_room(group):
+            factor = group.monthly_factor
+            amounts = {
+                k: min(f.ndays_saving(when, days_in_month)*factor, f.remainder_to_save()) for k, f in group.funds.items()
+            }
+            return sum(amounts.values()) - group.get_minimal_monthly_amount(year, month)
+        
+        def summerge_amounts(a, b):
+            m = {}
+            for k, v in a.items():
+                if type(v) is tuple:
+                    amount_a, subamounts_a = v
+                    amount_b, subamounts_b = b[k]
+                    m[k] = amount_a + amount_b, summerge_amounts(subamounts_a, subamounts_b)
+                else:
+                    m[k] = v + b[k]
+            
+            return m
+
+        if remainder > 0:
+            upfactor_room_d = {
+                k: upfactor_room(f) for k, f in self.funds.items()
+            }
+            for k, f in self.funds.items():
+                if upfactor_room_d[k] > 0:
+                    dist_amount = min(upfactor_room_d[k], remainder)
+                    extra_amounts, new_remainder = f.distribute_extra_savings(when, dist_amount)
+                    total_extra = dist_amount - new_remainder
+                    
+                    orig_amount, subamounts = amounts[k]
+                    new_subamounts = summerge_amounts(subamounts, extra_amounts)
+                    amounts[k] = orig_amount + total_extra, new_subamounts
+                    
+                    remainder = remainder - dist_amount + new_remainder
 
         return amounts, remainder, deficits
 
@@ -326,12 +364,10 @@ class FundGroup:
                 k: Decimal(0) for k in self.funds
             }, amount, Decimal(0)
         
-        extra_ratio = min(self.monthly_factor, amount/minimal_amount)
-        print(f"{self.name}: {self.monthly_factor}")
-        print(f"{self.name}: {extra_ratio}")
+        correction_ratio = min(Decimal(1), amount/minimal_amount)
 
         amounts = {
-            k: min(f.ndays_saving(when, days_in_month)*extra_ratio, f.remainder_to_save()) for k, f in self.funds.items()
+            k: min(f.ndays_saving(when, days_in_month)*correction_ratio, f.remainder_to_save()) for k, f in self.funds.items()
         }
         remainder = amount - sum(amounts.values())
 
