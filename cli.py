@@ -9,11 +9,11 @@ from commands.edit_commands import set_balance, change_target, change_target_dat
 from commands.money_commands import deposit, withdraw
 from commands.new_commands import init, new_account, new_fund_group, new_fixed_end_fund, new_open_end_fund, new_manual_fund
 from commands.delete_commands import remove_account, remove_fund
-from commands.reporting_commands import list_accounts, list_funds, funds_table, total_daily_saving_rate
+from commands.reporting_commands import list_accounts, list_funds, funds_table, total_daily_saving_rate, fund_details
 from dataloader import load_accounts_and_funds
 
 
-getcontext().prec = 10
+getcontext().prec = 100
 
 
 @click.group()
@@ -43,6 +43,7 @@ cli.add_command(list_accounts)
 cli.add_command(list_funds)
 cli.add_command(funds_table)
 cli.add_command(total_daily_saving_rate)
+cli.add_command(fund_details)
 
 cli.add_command(init)
 cli.add_command(new_account)

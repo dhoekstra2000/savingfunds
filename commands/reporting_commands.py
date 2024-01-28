@@ -2,7 +2,8 @@ from datetime import date
 
 import click
 
-from reporting import print_account_tree, print_fund_tree, print_funds_table
+from commands.utils import validate_existing_fund_key
+from reporting import print_account_tree, print_fund_tree, print_funds_table, print_fund_details
 from utils import moneyfmt
 
 
@@ -36,3 +37,15 @@ def total_daily_saving_rate(ctx, when):
     tdsr = funds.daily_saving_rate(when)
 
     print(f"Total daily saving rate: € {moneyfmt(tdsr, 4)}")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.pass_context
+def fund_details(ctx, key):
+    funds = ctx.obj['FUNDS']
+    validate_existing_fund_key(funds, key)
+
+    fund = funds.get_fund_by_key(key)
+
+    print_fund_details(fund)

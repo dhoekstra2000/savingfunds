@@ -6,7 +6,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
-from funds import Account, Fund, FundGroup
+from funds import Account, Fund, FundGroup, FixedEndFund, OpenEndFund, ManualFund
 from utils import moneyfmt
 
 
@@ -131,3 +131,26 @@ def print_savings_report(accounts, funds, amounts, info_contents):
     columns = Columns([funds_panel, accts_panel], expand=True)
 
     print(columns)
+
+
+def print_fund_details(fund):
+    table = Table(title=f"Details on '{fund.name}'")
+
+    table.add_column("Property")
+    table.add_column("Value")
+
+    table.add_row("Type", fund.get_type().capitalize())
+    table.add_row("Key", fund.key)
+    table.add_row("Name", fund.name)
+    table.add_row("Balance", "€ " + moneyfmt(fund.balance))
+    table.add_row("Target", "€ "+moneyfmt(fund.target))
+    table.add_row("Remainder", "€ "+moneyfmt(fund.remainder_to_save()))
+
+    if isinstance(fund, FixedEndFund):
+        table.add_row("Target date", f"{fund.target_date}")
+    elif isinstance(fund, OpenEndFund):
+        table.add_row("Saving days", f"{fund.days}")
+    elif isinstance(fund, FundGroup):
+        table.add_row("Contained funds", f"{len(fund.funds)}")
+
+    print(table)
