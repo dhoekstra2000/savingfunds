@@ -2,7 +2,9 @@ import calendar
 from datetime import date
 from decimal import Decimal
 
-from rich import print
+from rich.columns import Columns
+from rich.console import Group
+from rich.progress_bar import ProgressBar
 from rich.tree import Tree
 
 from utils import moneyfmt
@@ -110,7 +112,13 @@ class FixedEndFund:
         return min(dsr * days, self.remainder_to_save())
 
     def get_as_tree(self, tree):
-        return tree.add(f"[green]{self.name}[/green]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
+        progress = self.balance / self.target * Decimal(100)
+        progress_bar = ProgressBar(completed=float(progress), width=40)
+        columns = Columns([
+            progress_bar,
+            f"({self.balance / self.target * 100:.1f} %)"
+        ])
+        return tree.add(Group(f"[green]{self.name}[/green]: € {self.balance:.2f}/€ {self.target:.2f}", columns))
     
     def get_type(self):
         return "Fixed"
@@ -147,7 +155,13 @@ class OpenEndFund:
         return min(dsr * days, self.remainder_to_save())
 
     def get_as_tree(self, tree):
-        return tree.add(f"[blue]{self.name}[/blue]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
+        progress = self.balance / self.target * Decimal(100)
+        progress_bar = ProgressBar(completed=float(progress), width=40)
+        columns = Columns([
+            progress_bar,
+            f"({self.balance / self.target * 100:.1f} %)"
+        ])
+        return tree.add(Group(f"[blue]{self.name}[/blue]: € {self.balance:.2f}/€ {self.target:.2f}", columns))
     
     def get_type(self):
         return "Open"
@@ -385,12 +399,29 @@ class FundGroup:
         _, days_in_month = calendar.monthrange(year, month)
         return self.ndays_saving(date(year, month, 1), days_in_month)
 
+    def contains_manual_fund(self):
+        manual_in_subgroup = any([
+            f.contains_manual_fund() for f in self.funds.values() 
+            if isinstance(f, FundGroup)
+            ])
+        return any([isinstance(f, ManualFund) for f in self.funds.values()]) or manual_in_subgroup
+
     def get_as_tree(self, tree):
-        label = f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)"
-        if tree is None:
-            base = Tree(label)
+        group = None
+        label = f"{self.name}: € {self.balance:.2f}"
+        if self.contains_manual_fund():
+            group = Group(label)
         else:
-            base = tree.add(label)
+            label += f"/€ {self.target:.2f}"
+            progress = self.balance / self.target * Decimal(100)
+            progress_bar = ProgressBar(completed=float(progress), width=40)
+            columns = Columns([progress_bar, f"({progress:.1f} %)"])
+            group = Group(label, columns)
+
+        if tree is None:
+            base = Tree(group)
+        else:
+            base = tree.add(group)
         for f in self.funds.values():
             f.get_as_tree(base)
 
