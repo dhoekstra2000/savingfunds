@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import click
 
+from commands.utils import validate_amount, validate_existing_fund_key
 from datasaver import save_accounts_and_funds
 
 
@@ -12,21 +13,9 @@ from datasaver import save_accounts_and_funds
 def deposit(ctx, key, amount):
     funds = ctx.obj['FUNDS']
     
-    if not funds.contains_key(key):
-        click.echo(f"There is no fund with key '{key}'.")
-        raise SystemExit(1)
+    validate_existing_fund_key(funds, key)
     
-    try:
-        float(amount)
-    except ValueError:
-        click.echo("Passed amount is not a valid float.")
-        raise SystemExit(1)
-    
-    amount = Decimal(amount)
-    
-    if amount <= 0:
-        click.echo("The amount must be positive.")
-        raise SystemExit(1)
+    amount = validate_amount(amount)
     
     fund = funds.get_fund_by_key(key)
     fund.balance += amount
@@ -47,21 +36,13 @@ def deposit(ctx, key, amount):
 def withdraw(ctx, key, amount):
     funds = ctx.obj['FUNDS']
     
+    validate_existing_fund_key(funds, key)
+    
     if not funds.contains_key(key):
         click.echo(f"There is no fund with key '{key}'.")
         raise SystemExit(1)
     
-    try:
-        float(amount)
-    except ValueError:
-        click.echo("Passed amount is not a valid float.")
-        raise SystemExit(1)
-    
-    amount = Decimal(amount)
-    
-    if amount <= 0:
-        click.echo("The amount must be positive.")
-        raise SystemExit(1)
+    amount = validate_amount(amount)
     
     fund = funds.get_fund_by_key(key)
     

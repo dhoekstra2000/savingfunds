@@ -2,8 +2,9 @@ from decimal import Decimal
 
 import click
 
-from funds import Account, FundGroup, FixedEndFund, OpenEndFund, ManualFund, FundGroup
+from commands.utils import validate_amount, validate_existing_account_key, validate_new_account_key, validate_existing_fund_key, validate_new_fund_key
 from datasaver import save_funds_data, save_accounts_and_funds
+from funds import Account, FundGroup, FixedEndFund, OpenEndFund, ManualFund, FundGroup
 
 
 @click.command()
@@ -33,9 +34,7 @@ def init(ctx, account_key, account_name, group_key, group_name):
 def new_account(ctx, key, name):
     accounts = ctx.obj['ACCOUNTS']
 
-    if key in accounts:
-        click.echo(f"Account with key '{key}' already exists.")
-        raise SystemExit(1)
+    validate_new_account_key(accounts, key)
 
     new_account = Account(key, name)
     accounts[key] = new_account
@@ -56,10 +55,8 @@ def new_account(ctx, key, name):
 def new_fund_group(ctx, parent_group_key, key, name):
     funds = ctx.obj['FUNDS']
 
-    if funds.contains_key(key):
-        click.echo(f"There already exists a fund with key '{key}'.")
-        raise SystemExit(1)
-    
+    validate_new_fund_key(funds, key)
+
     new_fund = FundGroup(key, name)
 
     if not funds.add_fund_to_group(new_fund, parent_group_key):
@@ -88,25 +85,11 @@ def new_fixed_end_fund(ctx, parent_group_key, key, name, account_key, target, ta
     accounts = ctx.obj['ACCOUNTS']
     funds = ctx.obj['FUNDS']
 
-    if account_key not in accounts.keys():
-        click.echo(f"Account with key '{account_key}' not found.")
-        raise SystemExit(1)
+    validate_existing_account_key(accounts, account_key)
 
-    if funds.contains_key(key):
-        click.echo(f"There already exists a fund with key '{key}'.")
-        raise SystemExit(1)
+    validate_new_fund_key(funds, key)
     
-    try:
-        float(target)
-    except ValueError:
-        click.echo("Passed target is not a valid float.")
-        raise SystemExit(1)
-    
-    target = Decimal(target)
-    
-    if target <= 0:
-        click.echo("The target must be positive.")
-        raise SystemExit(1)
+    target = validate_amount(target)
 
     target_date = target_date.date()
 
@@ -142,25 +125,11 @@ def new_open_end_fund(ctx, parent_group_key, key, name, account_key, target, day
     accounts = ctx.obj['ACCOUNTS']
     funds = ctx.obj['FUNDS']
 
-    if account_key not in accounts.keys():
-        click.echo(f"Account with key '{account_key}' not found.")
-        raise SystemExit(1)
+    validate_existing_account_key(accounts, account_key)
 
-    if funds.contains_key(key):
-        click.echo(f"There already exists a fund with key '{key}'.")
-        raise SystemExit(1)
+    validate_new_fund_key(funds, key)
     
-    try:
-        float(target)
-    except ValueError:
-        click.echo("Passed target is not a valid float.")
-        raise SystemExit(1)
-    
-    target = Decimal(target)
-    
-    if target <= 0:
-        click.echo("The target must be positive.")
-        raise SystemExit(1)
+    target = validate_amount(target)
 
     if days <= 0:
         click.echo("Days must be positive.")
@@ -195,13 +164,9 @@ def new_manual_fund(ctx, parent_group_key, key, name, account_key):
     accounts = ctx.obj['ACCOUNTS']
     funds = ctx.obj['FUNDS']
 
-    if account_key not in accounts.keys():
-        click.echo(f"Account with key '{account_key}' not found.")
-        raise SystemExit(1)
+    validate_existing_account_key(accounts, account_key)
 
-    if funds.contains_key(key):
-        click.echo(f"There already exists a fund with key '{key}'.")
-        raise SystemExit(1)
+    validate_new_fund_key(funds, key)
     
     new_fund = ManualFund(key, name, accounts[account_key], Decimal(0))
 

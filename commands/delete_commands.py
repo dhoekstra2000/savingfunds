@@ -1,5 +1,6 @@
 import click
 
+from commands.utils import validate_existing_fund_key, validate_existing_account_key
 from datasaver import save_accounts_and_funds
 
 
@@ -9,9 +10,7 @@ from datasaver import save_accounts_and_funds
 def remove_fund(ctx, key):
     funds = ctx.obj['FUNDS']
 
-    if not funds.contains_key(key):
-        click.echo(f"There is no fund with key '{key}'.")
-        raise SystemExit(1)
+    validate_existing_fund_key(funds, key)
     
     try:
         funds.remove_fund_by_key(key)
@@ -33,9 +32,7 @@ def remove_fund(ctx, key):
 def remove_account(ctx, key):
     accounts = ctx.obj['ACCOUNTS']
 
-    if key not in accounts:
-        click.echo(f"There is no account with key '{key}'.")
-        raise SystemExit(1)
+    validate_existing_account_key(accounts, key)
     
     account = accounts[key]
     if len(account.funds) > 0:

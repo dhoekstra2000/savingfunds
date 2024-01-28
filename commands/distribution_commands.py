@@ -4,6 +4,7 @@ from datetime import date
 import click
 from rich.markdown import Markdown
 
+from commands.utils import validate_amount, validate_existing_account_key
 from datasaver import save_accounts_and_funds
 from reporting import print_savings_report, print_savings_amounts_as_tree
 from utils import moneyfmt
@@ -15,17 +16,7 @@ from utils import moneyfmt
 def distribute_extra(ctx, when, amount):
     when = when.date()
     
-    try:
-        float(amount)
-    except ValueError:
-        click.echo("Passed amount is not a valid float.")
-        raise SystemExit(1)
-    
-    amount = Decimal(amount)
-    
-    if amount <= 0:
-        click.echo("The amount must be positive.")
-        raise SystemExit(1)
+    amount = validate_amount(amount)
     
     funds = ctx.obj['FUNDS']
     
@@ -59,21 +50,9 @@ def distribute_interest(ctx, when, key, amount):
 
     accounts = ctx.obj['ACCOUNTS']
 
-    if key not in accounts:
-        click.echo(f"Account with key '{key}' not found.")
-        raise SystemExit(1)
+    validate_existing_account_key(accounts, key)
     
-    try:
-        float(amount)
-    except ValueError:
-        click.echo("Passed amount is not a valid float.")
-        raise SystemExit(1)
-    
-    amount = Decimal(amount)
-    
-    if amount <= 0:
-        click.echo("The amount must be positive.")
-        raise SystemExit(1)
+    amount = validate_amount(amount)
     
     account = accounts[key]
     amounts, remainder = account.distribute_interest(when, amount)
@@ -99,17 +78,7 @@ def distribute_interest(ctx, when, key, amount):
 @click.argument("amount", type=click.STRING)
 @click.pass_context
 def distribute_monthly(ctx, year, month, amount):
-    try:
-        float(amount)
-    except ValueError:
-        click.echo("Passed amount is not a valid float.")
-        raise SystemExit(1)
-    
-    amount = Decimal(amount)
-    
-    if amount <= 0:
-        click.echo("The amount must be positive.")
-        raise SystemExit(1)
+    amount = validate_amount(amount)
     
     funds = ctx.obj['FUNDS']
 
