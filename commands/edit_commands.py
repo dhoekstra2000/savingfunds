@@ -79,3 +79,25 @@ def change_target_date(ctx, key, target_date):
             save_accounts_and_funds(file, accounts, funds)
 
     print(f"Changed target date of fund '{fund.name}' to {target_date}.")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument("days", type=click.IntRange(0))
+@click.pass_context
+def change_saving_days(ctx, key, days):
+    funds = ctx.obj['FUNDS']
+    validate_existing_fund_key(funds, key)
+
+    fund = funds.get_fund_by_key(key)
+    validate_fund_type(fund, OpenEndFund)
+
+    fund.days = days
+
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed saving days of fund '{fund.name}' to {days}.")
