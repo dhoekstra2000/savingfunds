@@ -4,7 +4,7 @@ import click
 
 from commands.utils import validate_existing_fund_key, validate_amount, validate_fund_type
 from datasaver import save_accounts_and_funds
-from funds import BalanceFund, TargetFund, FixedEndFund, OpenEndFund
+from funds import Fund, BalanceFund, TargetFund, FixedEndFund, OpenEndFund
 
 
 @click.command()
@@ -30,6 +30,28 @@ def set_balance(ctx, key, balance):
             save_accounts_and_funds(file, accounts, funds)
 
     print(f"Set balance of fund '{fund.name}' to € {balance:.2f}.")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument("name", type=click.STRING)
+@click.pass_context
+def change_name(ctx, key, name):
+    funds = ctx.obj['FUNDS']
+    validate_existing_fund_key(funds, key)
+
+    fund = funds.get_fund_by_key(key)
+    validate_fund_type(fund, Fund)
+    old_name = fund.name
+    fund.name = name
+
+    if not ctx.obj['DRY_RUN']:
+        path = ctx.obj['PATH']
+        accounts = ctx.obj['ACCOUNTS']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed name of fund from '{old_name}' to '{name}'.")
 
 
 @click.command()

@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 
 from commands.distribution_commands import distribute_extra, distribute_interest, distribute_monthly
-from commands.edit_commands import set_balance, change_target, change_target_date, change_saving_days
+from commands.edit_commands import set_balance, change_target, change_target_date, change_saving_days, change_name
 from commands.money_commands import deposit, withdraw
 from commands.new_commands import init, new_account, new_fund_group, new_fixed_end_fund, new_open_end_fund, new_manual_fund
 from commands.delete_commands import remove_account, remove_fund
@@ -55,6 +55,7 @@ cli.add_command(set_balance)
 cli.add_command(change_target)
 cli.add_command(change_target_date)
 cli.add_command(change_saving_days)
+cli.add_command(change_name)
 
 cli.add_command(remove_account)
 cli.add_command(remove_fund)
