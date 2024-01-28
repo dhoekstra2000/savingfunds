@@ -5,6 +5,7 @@ import click
 from commands.utils import (
     validate_existing_fund_key,
     validate_amount,
+    validate_existing_account_key,
     validate_fund_type,
 )
 from datasaver import save_accounts_and_funds
@@ -12,6 +13,7 @@ from funds import (
     Fund,
     BalanceFund,
     TargetFund,
+    AccountFund,
     FixedEndFund,
     OpenEndFund,
     FundGroup,
@@ -163,3 +165,31 @@ def change_monthly_factor(ctx, key, factor):
     print(
         f"Monthly factor of fund group '{fund.name}' is set to {str(factor)}."
     )
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument("account_key", type=click.STRING)
+@click.pass_context
+def change_account(ctx, key, account_key):
+    funds = ctx.obj['FUNDS']
+    validate_existing_fund_key(funds, key)
+
+    accounts = ctx.obj['ACCOUNTS']
+    validate_existing_account_key(accounts, account_key)
+
+    fund = funds.get_fund_by_key(key)
+    validate_fund_type(fund, AccountFund)
+
+    account = accounts[account_key]
+    fund.account.funds.pop(key)
+    fund.account = account
+    account.funds[key] = fund
+
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        accounts = ctx.obj["ACCOUNTS"]
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed account of fund '{fund.name}' to '{account.name}'.")

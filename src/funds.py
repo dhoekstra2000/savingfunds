@@ -498,3 +498,4 @@ class FundGroup:
 Fund = FixedEndFund | OpenEndFund | ManualFund | FundGroup
 BalanceFund = FixedEndFund | OpenEndFund | ManualFund
 TargetFund = FixedEndFund | OpenEndFund
+AccountFund = FixedEndFund | OpenEndFund | ManualFund
