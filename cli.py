@@ -1,5 +1,5 @@
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from pathlib import Path
 
 import click
@@ -11,6 +11,9 @@ from datasaver import save_funds_data, save_accounts_and_funds
 from funds import Account, FundGroup, FixedEndFund, OpenEndFund, ManualFund
 from reporting import print_account_tree, print_fund_tree, print_funds_table, print_savings_amounts_as_tree, print_savings_amounts_for_accounts, print_savings_report
 from utils import moneyfmt
+
+
+getcontext().prec = 10
 
 
 @click.group()
@@ -581,6 +584,53 @@ def distribute_interest(ctx, when, key, amount):
         with open(path, "w") as file:
             save_accounts_and_funds(file, accounts, funds)
 
+
+@cli.command()
+@click.argument("year", type=click.INT)
+@click.argument("month", type=click.IntRange(min=1, max=12))
+@click.argument("amount", type=click.STRING)
+@click.pass_context
+def distribute_monthly(ctx, year, month, amount):
+    try:
+        float(amount)
+    except ValueError:
+        click.echo("Passed amount is not a valid float.")
+        raise SystemExit(1)
+    
+    amount = Decimal(amount)
+    
+    if amount <= 0:
+        click.echo("The amount must be positive.")
+        raise SystemExit(1)
+    
+    funds = ctx.obj['FUNDS']
+
+    minimal_monthly_amounts = {f: f.get_minimal_monthly_amount(year, month) for f in funds.funds.values()}
+    total_mma = sum(minimal_monthly_amounts.values())
+    amounts, remainder, deficit = funds.distribute_monthly_savings_tld(year, month, amount)
+    markdown = f"""
+Distributing monthly amount: € {amount:.2f}
+Month and year: {str(month):0>2}-{year}
+
+Minimal monthly amount: € {moneyfmt(total_mma)}
+
+Minimal monthly amount per tranche:
+"""
+    markdown += '\n'.join([
+        f"+ {f.name}: € {moneyfmt(v)}" for f, v in minimal_monthly_amounts.items()
+        if v > Decimal(0)
+        ]) + "\n"
+    if remainder > 0:
+        markdown += f"\nRemainder: € {moneyfmt(remainder)}"
+    elif deficit > 0:
+        markdown += f"\n**Deficit: € {moneyfmt(deficit)}**"
+    accounts = ctx.obj['ACCOUNTS']
+    print_savings_report(accounts, funds, amounts, Markdown(markdown))
+
+    if not ctx.obj['DRY_RUN']:  
+        path = ctx.obj['PATH']
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
 
 if __name__ == '__main__':
     cli()

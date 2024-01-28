@@ -1,5 +1,8 @@
+import calendar
+from datetime import date
 from decimal import Decimal
 
+from rich import print
 from rich.tree import Tree
 
 from utils import moneyfmt
@@ -101,6 +104,10 @@ class FixedEndFund:
             return self.remainder_to_save()
         
         return self.remainder_to_save() / days
+    
+    def ndays_saving(self, date, days):
+        dsr = self.daily_saving_rate(date)
+        return min(dsr * days, self.remainder_to_save())
 
     def get_as_tree(self, tree):
         return tree.add(f"[green]{self.name}[/green]: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)")
@@ -174,6 +181,9 @@ class ManualFund:
     def daily_saving_rate(self, date):
         return Decimal(0)
     
+    def ndays_saving(self, date, days):
+        return Decimal(0)
+    
     def get_as_tree(self, tree):
         return tree.add(f"[cyan]{self.name}[/cyan]: € {self.balance:.2f}")
     
@@ -191,10 +201,11 @@ class ManualFund:
 
 
 class FundGroup:
-    def __init__(self, key, name):
+    def __init__(self, key, name, monthly_factor=Decimal(1)):
         self.name = name
         self.key = key
         self.funds = {}
+        self.monthly_factor = monthly_factor
 
     @property
     def balance(self):
@@ -209,6 +220,9 @@ class FundGroup:
     
     def daily_saving_rate(self, date):
         return sum([f.daily_saving_rate(date) for f in self.funds.values()])
+    
+    def ndays_saving(self, date, days):
+        return sum([f.ndays_saving(date, days) for f in self.funds.values()])
     
     def get_type(self):
         return "Group"
@@ -287,6 +301,54 @@ class FundGroup:
             k: Decimal(0) for k in self.funds
         }, amount
 
+    def distribute_monthly_savings_tld(self, year, month, amount):
+        amounts = {}
+        deficits = Decimal(0)
+        remainder = amount
+
+        for k, f in self.funds.items():
+            subamounts, new_remainder, deficit = f.distribute_monthly_savings(year, month, remainder)
+            deficits += deficit
+            amounts[k] = (remainder - new_remainder ,subamounts)
+            remainder = new_remainder
+
+        return amounts, remainder, deficits
+
+    def distribute_monthly_savings(self, year, month, amount):
+        """Returns (amounts, remainder, deficit)"""
+        _, days_in_month = calendar.monthrange(year, month)
+        when = date(year, month, 1)
+
+        minimal_amount = self.get_minimal_monthly_amount(year, month)
+        deficit = max(Decimal(0), minimal_amount - amount)
+        if minimal_amount == Decimal(0):
+            return {
+                k: Decimal(0) for k in self.funds
+            }, amount, Decimal(0)
+        
+        extra_ratio = min(self.monthly_factor, amount/minimal_amount)
+        print(f"{self.name}: {self.monthly_factor}")
+        print(f"{self.name}: {extra_ratio}")
+
+        amounts = {
+            k: min(f.ndays_saving(when, days_in_month)*extra_ratio, f.remainder_to_save()) for k, f in self.funds.items()
+        }
+        remainder = amount - sum(amounts.values())
+
+        for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
+            subgroup_amounts, _, _ = f.distribute_monthly_savings(year, month, amounts[f.key])
+            amounts[f.key] = (amounts[f.key], subgroup_amounts)
+        
+        for f in filter(lambda f: type(f) is not FundGroup, self.funds.values()):
+                f.balance = f.balance + amounts[f.key]
+
+        return amounts, remainder, deficit
+
+
+    def get_minimal_monthly_amount(self, year, month):
+        _, days_in_month = calendar.monthrange(year, month)
+        return self.ndays_saving(date(year, month, 1), days_in_month)
+
     def get_as_tree(self, tree):
         label = f"{self.name}: € {self.balance:.2f}/€ {self.target:.2f} ({self.balance / self.target * 100:.1f} %)"
         if tree is None:
@@ -303,7 +365,8 @@ class FundGroup:
             "type": "group",
             "key": self.key,
             "name": self.name,
-            "funds": [f.to_dict() for f in self.funds.values()]
+            "funds": [f.to_dict() for f in self.funds.values()],
+            "monthly-factor": str(self.monthly_factor)
         }
 
 

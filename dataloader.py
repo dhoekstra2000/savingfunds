@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
+from rich import print
 import yaml
 from yaml import BaseLoader
 
@@ -41,6 +42,8 @@ def convert_data_to_accounts_and_funds(data):
     for fund_data in data['funds']:
         key = fund_data['key']
         group = FundGroup(key, fund_data['name'])
+        if 'monthly-factor' in fund_data:
+            group.monthly_factor = Decimal(fund_data['monthly-factor'])
         build_fund_tree(fund_data['funds'], accounts, group)
         root_fund_group.funds[key] = group
 
