@@ -49,7 +49,7 @@ def set_balance(ctx, key, balance):
 @click.argument("key", type=click.STRING)
 @click.argument("name", type=click.STRING)
 @click.pass_context
-def change_name(ctx, key, name):
+def rename_fund(ctx, key, name):
     funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 

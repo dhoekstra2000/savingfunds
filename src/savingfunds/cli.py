@@ -12,7 +12,7 @@ from savingfunds.commands.distribution_commands import (
 from savingfunds.commands.edit_commands import (
     change_account,
     change_monthly_factor,
-    change_name,
+    rename_fund,
     change_parent_group,
     change_saving_days,
     change_target,
@@ -80,7 +80,7 @@ cli.add_command(set_balance)
 cli.add_command(change_target)
 cli.add_command(change_target_date)
 cli.add_command(change_saving_days)
-cli.add_command(change_name)
+cli.add_command(rename_fund)
 cli.add_command(change_monthly_factor)
 cli.add_command(change_account)
 cli.add_command(change_parent_group)
