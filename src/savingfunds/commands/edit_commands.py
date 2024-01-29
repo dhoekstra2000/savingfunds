@@ -69,6 +69,27 @@ def rename_fund(ctx, key, name):
 
 @click.command()
 @click.argument("key", type=click.STRING)
+@click.argument("name", type=click.STRING)
+@click.pass_context
+def rename_account(ctx, key, name):
+    accounts = ctx.obj['ACCOUNTS']
+    validate_existing_account_key(accounts, key)
+
+    account = accounts['key']
+    old_name = account.name
+    account.name = name
+
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        funds = ctx.obj["FUNDS"]
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+    
+    print(f"Changed name of account from '{old_name}' to '{name}'.")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
 @click.argument("target", type=click.STRING)
 @click.pass_context
 def change_target(ctx, key, target):
