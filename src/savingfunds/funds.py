@@ -180,7 +180,7 @@ class OpenEndFund:
         )
         return tree.add(
             Group(
-                f"[blue]{self.name}[/blue]: "
+                f"[bright_magenta]{self.name}[/bright_magenta]: "
                 + f"€ {self.balance:.2f}/€ {self.target:.2f}",
                 columns,
             )
