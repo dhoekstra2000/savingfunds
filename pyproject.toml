@@ -9,7 +9,8 @@ authors = [
     { name="Douwe Hoekstra", email="douwe@35524.xyz" },
 ]
 description = "A small tool to manage saving for goals"
-requires-python = ">=3.12"
+readme = "README.md"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -20,6 +21,10 @@ dependencies = [
     "PyYaml>=6.0.1",
     "rich>=13.7.0"
 ]
+
+[project.urls]
+Homepage = "https://github.com/dhoekstra2000/savingfunds"
+Issues = "https://github.com/dhoekstra2000/savingfunds/issues"
 
 [project.scripts]
 savingfunds = "savingfunds.cli:cli"
