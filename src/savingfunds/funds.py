@@ -321,16 +321,46 @@ class FundGroup:
         }
         total_child_dsr = sum(child_dsr.values())
         amounts = {}
-        if total_child_dsr > 0:
-            amounts = {
-                k: min(
-                    amount * v / total_child_dsr,
-                    self.funds[k].remainder_to_save(),
-                )
-                for k, v in child_dsr.items()
-            }
-            remainder = amount - sum(amounts.values())
 
+        # We only have to distribute if there are saving rates.
+        if total_child_dsr > 0:
+            # Iterate over the funds to determine which will be completely
+            # filled. These funds will get the amount necessary to fill them
+            # completely.
+            funds_left = list(self.funds.keys())
+            while True:
+                remainder_total_dsr = sum([child_dsr[k] for k in funds_left])
+                capping_funds = [
+                    k
+                    for k in funds_left
+                    if amount * child_dsr[k] / remainder_total_dsr
+                    >= self.funds[k].remainder_to_save()
+                ]
+
+                for k in capping_funds:
+                    amounts[k] = self.funds[k].remainder_to_save()
+                    amount -= amounts[k]
+                    funds_left.remove(k)
+
+                if len(capping_funds) == 0:
+                    break
+
+            # The rest of the funds will be filled based on the relative
+            # propertions of their daily saving rates.
+            remainder_total_dsr = sum([child_dsr[k] for k in funds_left])
+            for k in funds_left:
+                amounts[k] = amount * child_dsr[k] / remainder_total_dsr
+
+            # Deduct the distributed amounts based on proportions.
+            amount -= sum([amounts[k] for k in funds_left])
+
+            # Order the funds again based on the original ordering.
+            fund_order = list(self.funds.keys())
+            for k in fund_order:
+                amounts[k] = amounts.pop(k)
+
+            # Determine the subamounts for the FundGroups contained in this
+            # FundGroup.
             for f in filter(
                 lambda f: type(f) is FundGroup, self.funds.values()
             ):
@@ -339,12 +369,15 @@ class FundGroup:
                 )
                 amounts[f.key] = (amounts[f.key], subgroup_amounts)
 
+            # Update the balance for all non-FundGroup funds in this group.
             for f in filter(
                 lambda f: type(f) is not FundGroup, self.funds.values()
             ):
                 f.balance = f.balance + amounts[f.key]
 
-            return amounts, remainder
+            # Since the distributed amounts were deducted from `amount` along
+            # the way, amount is the remainder.
+            return amounts, amount
 
         return {k: Decimal(0) for k in self.funds}, amount
 
