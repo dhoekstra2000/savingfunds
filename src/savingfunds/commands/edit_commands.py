@@ -25,6 +25,7 @@ from savingfunds.funds import (
 @click.argument("balance", type=click.STRING)
 @click.pass_context
 def set_balance(ctx, key, balance):
+    """Set the balance of a fund."""
     funds = ctx.obj["FUNDS"]
 
     validate_existing_fund_key(funds, key)
@@ -50,6 +51,7 @@ def set_balance(ctx, key, balance):
 @click.argument("name", type=click.STRING)
 @click.pass_context
 def rename_fund(ctx, key, name):
+    """Rename a fund."""
     funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
@@ -72,6 +74,7 @@ def rename_fund(ctx, key, name):
 @click.argument("name", type=click.STRING)
 @click.pass_context
 def rename_account(ctx, key, name):
+    """Rename an account."""
     accounts = ctx.obj["ACCOUNTS"]
     validate_existing_account_key(accounts, key)
 
@@ -93,6 +96,7 @@ def rename_account(ctx, key, name):
 @click.argument("target", type=click.STRING)
 @click.pass_context
 def change_target(ctx, key, target):
+    """Change the target of a fund with a target."""
     funds = ctx.obj["FUNDS"]
 
     validate_existing_fund_key(funds, key)
@@ -118,6 +122,7 @@ def change_target(ctx, key, target):
 @click.argument("target_date", type=click.DateTime(formats=["%Y-%m-%d"]))
 @click.pass_context
 def change_target_date(ctx, key, target_date):
+    """Change the target date of a fixed end fund."""
     target_date = target_date.date()
 
     funds = ctx.obj["FUNDS"]
@@ -142,6 +147,7 @@ def change_target_date(ctx, key, target_date):
 @click.argument("days", type=click.IntRange(0))
 @click.pass_context
 def change_saving_days(ctx, key, days):
+    """Change the number of saving days for an open end fund"""
     funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
@@ -164,6 +170,7 @@ def change_saving_days(ctx, key, days):
 @click.argument("factor", type=click.STRING)
 @click.pass_context
 def change_monthly_factor(ctx, key, factor):
+    """Change the monthly surplus factor of a fundgroup."""
     funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
@@ -193,6 +200,7 @@ def change_monthly_factor(ctx, key, factor):
 @click.argument("account_key", type=click.STRING)
 @click.pass_context
 def change_account(ctx, key, account_key):
+    """Change the account of a fund."""
     funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
@@ -221,6 +229,7 @@ def change_account(ctx, key, account_key):
 @click.argument("parent_key", type=click.STRING)
 @click.pass_context
 def change_parent_group(ctx, key, parent_key):
+    """Change the parent fund group of a fund."""
     funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
     validate_existing_fund_key(funds, parent_key)

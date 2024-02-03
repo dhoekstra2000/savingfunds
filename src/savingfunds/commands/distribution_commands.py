@@ -25,6 +25,7 @@ from savingfunds.utils import moneyfmt
 @click.argument("amount", type=click.STRING)
 @click.pass_context
 def distribute_extra(ctx, when, amount):
+    """Distribute an extra amount over all funds."""
     when = when.date()
 
     amount = validate_amount(amount)
@@ -61,6 +62,7 @@ Remaining amount: € {remainder:.2f}
 @click.argument("amount", type=click.STRING)
 @click.pass_context
 def distribute_interest(ctx, when, key, amount):
+    """Distribute interest over all funds with the given account."""
     when = when.date()
 
     accounts = ctx.obj["ACCOUNTS"]
@@ -93,6 +95,7 @@ def distribute_interest(ctx, when, key, amount):
 @click.argument("amount", type=click.STRING)
 @click.pass_context
 def distribute_monthly(ctx, year, month, amount):
+    """Distribute money on a monthly basis to hit the targets."""
     amount = validate_amount(amount)
 
     funds = ctx.obj["FUNDS"]

@@ -11,6 +11,7 @@ from savingfunds.datasaver import save_accounts_and_funds
 @click.argument("key")
 @click.pass_context
 def remove_fund(ctx, key):
+    """Remove a fund from the tree of saving funds."""
     funds = ctx.obj["FUNDS"]
 
     validate_existing_fund_key(funds, key)
@@ -34,6 +35,7 @@ def remove_fund(ctx, key):
 @click.argument("key")
 @click.pass_context
 def remove_account(ctx, key):
+    """Remove an account."""
     accounts = ctx.obj["ACCOUNTS"]
 
     validate_existing_account_key(accounts, key)

@@ -14,6 +14,7 @@ from savingfunds.funds import BalanceFund
 @click.argument("amount", type=click.STRING)
 @click.pass_context
 def deposit(ctx, key, amount):
+    """Deposit money into a fund."""
     funds = ctx.obj["FUNDS"]
 
     validate_existing_fund_key(funds, key)
@@ -42,6 +43,7 @@ def deposit(ctx, key, amount):
 @click.argument("amount", type=click.STRING)
 @click.pass_context
 def withdraw(ctx, key, amount):
+    """Withdraw money from a fund."""
     funds = ctx.obj["FUNDS"]
 
     validate_existing_fund_key(funds, key)

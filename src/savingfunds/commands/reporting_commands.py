@@ -15,6 +15,7 @@ from savingfunds.utils import moneyfmt
 @click.command("list-accounts")
 @click.pass_context
 def list_accounts(ctx):
+    """Print a tree of all the accounts."""
     accounts = ctx.obj["ACCOUNTS"]
     print_account_tree(accounts)
 
@@ -22,6 +23,7 @@ def list_accounts(ctx):
 @click.command("list-funds")
 @click.pass_context
 def list_funds(ctx):
+    """Print a tree of all the funds."""
     funds = ctx.obj["FUNDS"]
     print_fund_tree(funds)
 
@@ -29,6 +31,7 @@ def list_funds(ctx):
 @click.command()
 @click.pass_context
 def funds_table(ctx):
+    """Print a table with all funds."""
     funds = ctx.obj["FUNDS"]
     print_funds_table(funds)
 
@@ -41,6 +44,7 @@ def funds_table(ctx):
 )
 @click.pass_context
 def total_daily_saving_rate(ctx, when):
+    """Print the total daily saving rate on a given date."""
     when = when.date()
     funds = ctx.obj["FUNDS"]
     tdsr = funds.daily_saving_rate(when)
@@ -52,6 +56,7 @@ def total_daily_saving_rate(ctx, when):
 @click.argument("key", type=click.STRING)
 @click.pass_context
 def fund_details(ctx, key):
+    """Print the details of a given fund."""
     funds = ctx.obj["FUNDS"]
     validate_existing_fund_key(funds, key)
 
