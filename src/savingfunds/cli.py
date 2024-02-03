@@ -42,8 +42,17 @@ getcontext().prec = 100
 
 
 @click.group()
-@click.option("--file", default="./funds.yaml", type=click.Path())
-@click.option("--dry-run", is_flag=True)
+@click.option(
+    "--file",
+    default="./funds.yaml",
+    type=click.Path(),
+    help="The file containing the funds and accounts.",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Run the command without saving the changes.",
+)
 @click.pass_context
 def cli(ctx, file, dry_run):
     ctx.ensure_object(dict)
