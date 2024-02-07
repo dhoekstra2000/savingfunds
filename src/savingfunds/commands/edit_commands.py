@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 import click
+from schwifty import IBAN
+from schwifty.exceptions import SchwiftyException
 
 from savingfunds.commands.utils import (
     validate_amount,
@@ -251,3 +253,30 @@ def change_parent_group(ctx, key, parent_key):
             save_accounts_and_funds(file, accounts, funds)
 
     print(f"Changed parent of fund '{fund.name}' to '{new_parent_fund.name}'")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument("iban", type=click.STRING)
+@click.pass_context
+def change_iban(ctx, key, iban):
+    """Change the IBAN of an account."""
+    accounts = ctx.obj["ACCOUNTS"]
+    validate_existing_account_key(accounts, key)
+
+    try:
+        iban = IBAN(iban)
+    except SchwiftyException as e:
+        print(f"Problem with IBAN: {e.args[0]}")
+        raise SystemExit(1)
+
+    account = accounts[key]
+    account.iban = iban
+
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        funds = ctx.obj["FUNDS"]
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed IBAN of '{account.name}' to '{iban.formatted}'.")

@@ -1,6 +1,8 @@
 from datetime import date
 from decimal import Decimal
 
+from schwifty import IBAN
+from schwifty.exceptions import SchwiftyException
 import yaml
 from yaml import BaseLoader
 
@@ -58,6 +60,15 @@ def convert_data_to_accounts_and_funds(data):
     acct_data = data["accounts"]
     accounts = {}
     for acct in acct_data:
+        if acct['iban'] != '':
+            try:
+                iban = IBAN(acct['iban'])
+            except SchwiftyException as e:
+                print(f"There is a problem with the iban of '{acct["name"]}'.")
+                print(e.args[0])
+            acct['iban'] = iban
+        else:
+            acct['iban'] = None
         accounts[acct["key"]] = Account(**acct)
 
     root_fund_group = FundGroup("root", "Root")

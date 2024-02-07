@@ -11,7 +11,7 @@ from savingfunds.utils import moneyfmt
 
 
 class Account:
-    def __init__(self, key, name, iban="", comments=""):
+    def __init__(self, key, name, iban=None, comments=""):
         self.name = name
         self.key = key
         self.iban = iban
@@ -103,7 +103,7 @@ class Account:
         return {
             "key": self.key,
             "name": self.name,
-            "iban": self.iban,
+            "iban": "" if self.iban is None else self.iban.formatted,
             "comments": self.comments,
         }
 
