@@ -11,9 +11,11 @@ from savingfunds.utils import moneyfmt
 
 
 class Account:
-    def __init__(self, key, name):
+    def __init__(self, key, name, iban="", comments=""):
         self.name = name
         self.key = key
+        self.iban = iban
+        self.comments = comments
         self.funds = {}
 
     def get_minimal_balance(self):
@@ -98,7 +100,12 @@ class Account:
         return self.__str__()
 
     def to_dict(self):
-        return {"key": self.key, "name": self.name}
+        return {
+            "key": self.key,
+            "name": self.name,
+            "iban": self.iban,
+            "comments": self.comments,
+        }
 
 
 class FixedEndFund:
