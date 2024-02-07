@@ -162,3 +162,21 @@ def print_fund_details(fund):
         table.add_row("Contained funds", f"{len(fund.funds)}")
 
     print(table)
+
+
+def print_account_details(account):
+    table = Table(title=f"Details of '{account.name}'")
+
+    table.add_column("Property")
+    table.add_column("Value")
+
+    table.add_row("Key", account.key)
+    table.add_row("Name", account.name)
+    table.add_row(
+        "Manual funds?", "Yes" if account.has_manual_funds() else "No"
+    )
+    table.add_row(
+        "Minimal balance", f"€ {moneyfmt(account.get_minimal_balance())}"
+    )
+
+    print(table)

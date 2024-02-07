@@ -2,8 +2,12 @@ from datetime import date
 
 import click
 
-from savingfunds.commands.utils import validate_existing_fund_key
+from savingfunds.commands.utils import (
+    validate_existing_account_key,
+    validate_existing_fund_key,
+)
 from savingfunds.reporting import (
+    print_account_details,
     print_account_tree,
     print_fund_details,
     print_fund_tree,
@@ -63,3 +67,16 @@ def fund_details(ctx, key):
     fund = funds.get_fund_by_key(key)
 
     print_fund_details(fund)
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.pass_context
+def account_details(ctx, key):
+    """Print the details of a given account."""
+    accounts = ctx.obj["ACCOUNTS"]
+    validate_existing_account_key(accounts, key)
+
+    account = accounts[key]
+
+    print_account_details(account)

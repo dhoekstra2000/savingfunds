@@ -16,8 +16,8 @@ from savingfunds.commands.edit_commands import (
     change_saving_days,
     change_target,
     change_target_date,
-    rename_fund,
     rename_account,
+    rename_fund,
     set_balance,
 )
 from savingfunds.commands.money_commands import deposit, withdraw
@@ -30,6 +30,7 @@ from savingfunds.commands.new_commands import (
     new_open_end_fund,
 )
 from savingfunds.commands.reporting_commands import (
+    account_details,
     fund_details,
     funds_table,
     list_accounts,
@@ -78,6 +79,7 @@ cli.add_command(list_funds)
 cli.add_command(funds_table)
 cli.add_command(total_daily_saving_rate)
 cli.add_command(fund_details)
+cli.add_command(account_details)
 
 cli.add_command(init)
 cli.add_command(new_account)
