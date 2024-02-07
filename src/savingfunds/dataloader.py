@@ -6,8 +6,13 @@ from schwifty import IBAN
 from schwifty.exceptions import SchwiftyException
 from yaml import BaseLoader
 
-from savingfunds.funds import (Account, FixedEndFund, FundGroup, ManualFund,
-                               OpenEndFund)
+from savingfunds.funds import (
+    Account,
+    FixedEndFund,
+    FundGroup,
+    ManualFund,
+    OpenEndFund,
+)
 
 
 def build_fund_tree(fund_data, accounts, group):
@@ -55,15 +60,19 @@ def convert_data_to_accounts_and_funds(data):
     acct_data = data["accounts"]
     accounts = {}
     for acct in acct_data:
-        if acct['iban'] != '':
+        if acct["iban"] != "":
             try:
-                iban = IBAN(acct['iban'])
+                iban = IBAN(acct["iban"])
             except SchwiftyException as e:
-                print(f"There is a problem with the iban of '{acct["name"]}'.")
+                print(
+                    "There is a problem with the iban of '"
+                    + acct["name"]
+                    + "'."
+                )
                 print(e.args[0])
-            acct['iban'] = iban
+            acct["iban"] = iban
         else:
-            acct['iban'] = None
+            acct["iban"] = None
         accounts[acct["key"]] = Account(**acct)
 
     root_fund_group = FundGroup("root", "Root")
