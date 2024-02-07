@@ -24,6 +24,11 @@ class Account:
     def has_manual_funds(self):
         return any([type(f) is ManualFund for f in self.funds.values()])
 
+    def get_iban_as_str(self):
+        if self.iban is None:
+            return "-"
+        return self.iban.formatted
+
     def distribute_interest(self, date, amount):
         manual_funds = {
             k: f for k, f in self.funds.items() if type(f) is ManualFund

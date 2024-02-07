@@ -1,15 +1,18 @@
 accounts:
-  - name: Test account
-    key: test
+- comments: This is a comment
+  iban: NL36 ASNB 0708 6555 48
+  key: test
+  name: Test account
 funds:
-  - type: group
-    key: prioriteit
-    name: Prioriteit
-    funds:
-      - type: fixed
-        name: Test
-        key: test
-        account: test
-        balance: 0
-        target: 100
-        target_date: 1970-01-01
+- funds:
+  - account: test
+    balance: '10.00'
+    key: test
+    name: Test
+    target: '100.00'
+    target_date: '1970-01-01'
+    type: fixed
+  key: prioriteit
+  monthly-factor: '1'
+  name: Prioriteit
+  type: group

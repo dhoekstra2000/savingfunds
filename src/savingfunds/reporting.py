@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from rich import print
 from rich.columns import Columns
+from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
@@ -121,7 +122,13 @@ def tree_for_savings_amounts_for_accounts(accounts, amounts):
         acct_amount = sum(
             [v for k, v in flat_amounts.items() if k in acct.funds]
         )
-        tree.add(f"{acct.name}: € {moneyfmt(acct_amount)}.")
+        tree.add(
+            Group(
+                f"{acct.name}: € {moneyfmt(acct_amount)}.",
+                f"IBAN: {acct.get_iban_as_str()}",
+                f"Comments: {acct.comments}",
+            )
+        )
 
     return tree
 
@@ -172,8 +179,7 @@ def print_account_details(account):
 
     table.add_row("Key", account.key)
     table.add_row("Name", account.name)
-    if account.iban is not None:
-        table.add_row("IBAN", account.iban.formatted)
+    table.add_row("IBAN", account.get_iban_as_str())
     table.add_row(
         "Manual funds?", "Yes" if account.has_manual_funds() else "No"
     )
