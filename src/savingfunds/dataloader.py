@@ -1,18 +1,13 @@
 from datetime import date
 from decimal import Decimal
 
+import yaml
 from schwifty import IBAN
 from schwifty.exceptions import SchwiftyException
-import yaml
 from yaml import BaseLoader
 
-from savingfunds.funds import (
-    Account,
-    FixedEndFund,
-    FundGroup,
-    ManualFund,
-    OpenEndFund,
-)
+from savingfunds.funds import (Account, FixedEndFund, FundGroup, ManualFund,
+                               OpenEndFund)
 
 
 def build_fund_tree(fund_data, accounts, group):

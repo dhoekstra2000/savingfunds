@@ -11,6 +11,8 @@ from savingfunds.commands.distribution_commands import (
 )
 from savingfunds.commands.edit_commands import (
     change_account,
+    change_comments,
+    change_iban,
     change_monthly_factor,
     change_parent_group,
     change_saving_days,
@@ -19,7 +21,6 @@ from savingfunds.commands.edit_commands import (
     rename_account,
     rename_fund,
     set_balance,
-    change_iban,
 )
 from savingfunds.commands.money_commands import deposit, withdraw
 from savingfunds.commands.new_commands import (
@@ -99,6 +100,7 @@ cli.add_command(change_monthly_factor)
 cli.add_command(change_account)
 cli.add_command(change_parent_group)
 cli.add_command(change_iban)
+cli.add_command(change_comments)
 
 cli.add_command(remove_account)
 cli.add_command(remove_fund)

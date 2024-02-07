@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command to list details of an account.
 - Tracking of IBAN and comments of an account.
 - Command to change IBAN of an account.
+- Command to change the comments of an account.
 
 ## 0.1.1 - 2024-02-01
 

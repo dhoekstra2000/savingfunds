@@ -280,3 +280,24 @@ def change_iban(ctx, key, iban):
             save_accounts_and_funds(file, accounts, funds)
 
     print(f"Changed IBAN of '{account.name}' to '{iban.formatted}'.")
+
+
+@click.command()
+@click.argument("key", type=click.STRING)
+@click.argument("comment", type=click.STRING)
+@click.pass_context
+def change_comments(ctx, key, comment):
+    """Change the comments of an account."""
+    accounts = ctx.obj["ACCOUNTS"]
+    validate_existing_account_key(accounts, key)
+
+    account = accounts[key]
+    account.comment = comment
+
+    if not ctx.obj["DRY_RUN"]:
+        path = ctx.obj["PATH"]
+        funds = ctx.obj["FUNDS"]
+        with open(path, "w") as file:
+            save_accounts_and_funds(file, accounts, funds)
+
+    print(f"Changed comment of '{account.name}' to:\n{comment}")
