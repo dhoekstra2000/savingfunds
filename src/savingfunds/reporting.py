@@ -172,11 +172,14 @@ def print_account_details(account):
 
     table.add_row("Key", account.key)
     table.add_row("Name", account.name)
+    if account.iban is not None:
+        table.add_row("IBAN", account.iban.formatted)
     table.add_row(
         "Manual funds?", "Yes" if account.has_manual_funds() else "No"
     )
     table.add_row(
         "Minimal balance", f"€ {moneyfmt(account.get_minimal_balance())}"
     )
+    table.add_row("Comments", account.comments)
 
     print(table)
