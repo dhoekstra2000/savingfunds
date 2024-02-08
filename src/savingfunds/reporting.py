@@ -122,13 +122,14 @@ def tree_for_savings_amounts_for_accounts(accounts, amounts):
         acct_amount = sum(
             [v for k, v in flat_amounts.items() if k in acct.funds]
         )
-        tree.add(
-            Group(
-                f"{acct.name}: € {moneyfmt(acct_amount)}.",
-                f"IBAN: {acct.get_iban_as_str()}",
-                f"Comments: {acct.comments}",
-            )
-        )
+
+        rows = [f"{acct.name}: € {moneyfmt(acct_amount)}."]
+        if acct.iban is not None:
+            rows.append(f"IBAN: {acct.get_iban_as_str()}")
+        if acct.comments != "":
+            rows.append(f"Comments: {acct.comments}")
+
+        tree.add(Group(*rows))
 
     return tree
 
