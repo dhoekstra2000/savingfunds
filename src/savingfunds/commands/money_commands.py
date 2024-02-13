@@ -6,7 +6,7 @@ from savingfunds.commands.utils import (
     validate_fund_type,
 )
 from savingfunds.datasaver import save_accounts_and_funds
-from savingfunds.funds import BalanceFund
+from savingfunds.funds import BalanceFund, TargetFund
 
 
 @click.command()
@@ -41,8 +41,9 @@ def deposit(ctx, key, amount):
 @click.command()
 @click.argument("key", type=click.STRING)
 @click.argument("amount", type=click.STRING)
+@click.option("--lower-target", is_flag=True)
 @click.pass_context
-def withdraw(ctx, key, amount):
+def withdraw(ctx, key, amount, lower_target):
     """Withdraw money from a fund."""
     funds = ctx.obj["FUNDS"]
 
@@ -61,6 +62,11 @@ def withdraw(ctx, key, amount):
         raise SystemExit(1)
 
     fund.balance -= amount
+
+    if lower_target and not isinstance(fund, TargetFund):
+        print(f"Warning: Fund '{fund.name}' does not have a target.")
+    elif lower_target:
+        fund.target -= amount
 
     if not ctx.obj["DRY_RUN"]:
         path = ctx.obj["PATH"]
