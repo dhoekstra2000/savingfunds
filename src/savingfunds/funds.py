@@ -1,4 +1,5 @@
 import calendar
+import random
 from datetime import date
 from decimal import Decimal
 
@@ -7,7 +8,7 @@ from rich.console import Group
 from rich.progress_bar import ProgressBar
 from rich.tree import Tree
 
-from savingfunds.utils import moneyfmt
+from savingfunds.utils import dec_round, moneyfmt
 
 
 class Account:
@@ -327,7 +328,7 @@ class FundGroup:
 
         return False
 
-    def distribute_extra_savings(self, when, amount):
+    def distribute_extra_savings(self, when, amount, subgroup=False):
         child_dsr = {
             k: f.daily_saving_rate(when) for k, f in self.funds.items()
         }
@@ -361,7 +362,34 @@ class FundGroup:
             # propertions of their daily saving rates.
             remainder_total_dsr = sum([child_dsr[k] for k in funds_left])
             for k in funds_left:
-                amounts[k] = amount * child_dsr[k] / remainder_total_dsr
+                amounts[k] = dec_round(
+                    amount * child_dsr[k] / remainder_total_dsr, 2
+                )
+
+            print(amounts)
+
+            # Check if rounding caused overdistribution.
+            amount_funds_left_sum = sum([amounts[k] for k in funds_left])
+            if amount_funds_left_sum > amount:
+                diff = amount_funds_left_sum - amount
+                print(f"Diff: {diff}")
+                # Remove cents from random funds until no difference is left.
+                for k in random.sample(funds_left, len(funds_left)):
+                    if amounts[k] >= diff:
+                        amounts[k] -= diff
+                        break
+                    else:
+                        amounts[k] -= Decimal("0.01")
+                        diff -= Decimal("0.01")
+                        if diff == Decimal(0):
+                            break
+
+            # Make sure that all amounts are distributed in a subgroup.
+            if subgroup and amount > amount_funds_left_sum:
+                # Find fund to deposit extra randomly.
+                diff = amount - amount_funds_left_sum
+                k = random.sample(funds_left, len(funds_left))[0]
+                amounts[k] += diff
 
             # Deduct the distributed amounts based on proportions.
             amount -= sum([amounts[k] for k in funds_left])
@@ -377,7 +405,7 @@ class FundGroup:
                 lambda f: type(f) is FundGroup, self.funds.values()
             ):
                 subgroup_amounts, _ = f.distribute_extra_savings(
-                    when, amounts[f.key]
+                    when, amounts[f.key], True
                 )
                 amounts[f.key] = (amounts[f.key], subgroup_amounts)
 
