@@ -10,7 +10,21 @@ funds:
     key: test
     name: Test
     target: '100.00'
-    target_date: '1970-01-01'
+    target_date: '2024-09-10'
+    type: fixed
+  - account: test
+    balance: '12.23'
+    key: test-II
+    name: Test II
+    target: '150.00'
+    target_date: '2024-10-10'
+    type: fixed
+  - account: test
+    balance: '12.23'
+    key: test-III
+    name: Test III
+    target: '150.00'
+    target_date: '2024-10-10'
     type: fixed
   key: prioriteit
   monthly-factor: '1'
