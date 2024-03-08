@@ -1,7 +1,7 @@
 import calendar
-import random
 from datetime import date
 from decimal import Decimal
+import random
 
 from rich.columns import Columns
 from rich.console import Group
