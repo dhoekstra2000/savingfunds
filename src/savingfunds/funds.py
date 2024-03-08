@@ -8,7 +8,12 @@ from rich.console import Group
 from rich.progress_bar import ProgressBar
 from rich.tree import Tree
 
-from savingfunds.utils import dec_round, moneyfmt
+from savingfunds.utils import (
+    dec_round,
+    moneyfmt,
+    fix_overdistribution,
+    fix_underdistribution,
+)
 
 
 class Account:
@@ -366,30 +371,12 @@ class FundGroup:
                     amount * child_dsr[k] / remainder_total_dsr, 2
                 )
 
-            print(amounts)
-
             # Check if rounding caused overdistribution.
-            amount_funds_left_sum = sum([amounts[k] for k in funds_left])
-            if amount_funds_left_sum > amount:
-                diff = amount_funds_left_sum - amount
-                print(f"Diff: {diff}")
-                # Remove cents from random funds until no difference is left.
-                for k in random.sample(funds_left, len(funds_left)):
-                    if amounts[k] >= diff:
-                        amounts[k] -= diff
-                        break
-                    else:
-                        amounts[k] -= Decimal("0.01")
-                        diff -= Decimal("0.01")
-                        if diff == Decimal(0):
-                            break
+            amounts = fix_overdistribution(amounts, amount, funds_left)
 
             # Make sure that all amounts are distributed in a subgroup.
-            if subgroup and amount > amount_funds_left_sum:
-                # Find fund to deposit extra randomly.
-                diff = amount - amount_funds_left_sum
-                k = random.sample(funds_left, len(funds_left))[0]
-                amounts[k] += diff
+            if subgroup:
+                amounts = fix_underdistribution(amounts, amount, funds_left)
 
             # Deduct the distributed amounts based on proportions.
             amount -= sum([amounts[k] for k in funds_left])
@@ -500,17 +487,27 @@ class FundGroup:
 
         amounts = {
             k: min(
-                f.ndays_saving(when, days_in_month) * correction_ratio,
+                dec_round(
+                    f.ndays_saving(when, days_in_month) * correction_ratio, 2
+                ),
                 f.remainder_to_save(),
             )
             for k, f in self.funds.items()
         }
+        amounts = fix_overdistribution(
+            amounts, amount, list(self.funds.keys())
+        )
+        if correction_ratio < Decimal(1):
+            amounts = fix_underdistribution(
+                amounts, amount, list(self.funds.keys())
+            )
         remainder = amount - sum(amounts.values())
 
         for f in filter(lambda f: type(f) is FundGroup, self.funds.values()):
-            subgroup_amounts, _, _ = f.distribute_monthly_savings(
+            subgroup_amounts, subremainder, _ = f.distribute_monthly_savings(
                 year, month, amounts[f.key]
             )
+
             amounts[f.key] = (amounts[f.key], subgroup_amounts)
 
         for f in filter(
@@ -522,7 +519,9 @@ class FundGroup:
 
     def get_minimal_monthly_amount(self, year, month):
         _, days_in_month = calendar.monthrange(year, month)
-        return self.ndays_saving(date(year, month, 1), days_in_month)
+        return dec_round(
+            self.ndays_saving(date(year, month, 1), days_in_month), 2
+        )
 
     def contains_manual_fund(self):
         manual_in_subgroup = any(

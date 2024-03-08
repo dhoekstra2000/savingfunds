@@ -30,3 +30,22 @@ funds:
   monthly-factor: '1'
   name: Prioriteit
   type: group
+- funds:
+  - account: test
+    balance: '10.00'
+    key: sec
+    name: Sec
+    target: '100.00'
+    target_date: '2024-09-10'
+    type: fixed
+  - account: test
+    balance: '12.23'
+    key: sec-II
+    name: Sec II
+    target: '150.00'
+    target_date: '2024-10-10'
+    type: fixed
+  key: secundair
+  monthly-factor: '1'
+  name: Secundair
+  type: group
