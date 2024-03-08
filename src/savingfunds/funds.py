@@ -1,7 +1,6 @@
 import calendar
 from datetime import date
 from decimal import Decimal
-import random
 
 from rich.columns import Columns
 from rich.console import Group
@@ -52,10 +51,11 @@ class Account:
         manual_funds_amount = None
         non_manual_funds_amount = None
         if manual_funds_balance + non_manual_funds_balance > 0:
-            manual_funds_amount = (
+            manual_funds_amount = dec_round(
                 amount
                 * manual_funds_balance
-                / (manual_funds_balance + non_manual_funds_balance)
+                / (manual_funds_balance + non_manual_funds_balance),
+                2,
             )
             non_manual_funds_amount = amount - manual_funds_amount
         else:
@@ -71,9 +71,15 @@ class Account:
             manual_funds_amount = amount
         else:
             amounts = {
-                k: non_manual_funds_amount * v / total_dsr
+                k: dec_round(non_manual_funds_amount * v / total_dsr, 2)
                 for k, v in child_dsr.items()
             }
+            amounts = fix_overdistribution(
+                amounts, non_manual_funds_amount, list(non_manual_funds.keys())
+            )
+            amounts = fix_underdistribution(
+                amounts, non_manual_funds_amount, list(non_manual_funds.keys())
+            )
 
         amounts = {
             k: min(v, self.funds[k].remainder_to_save())
@@ -84,8 +90,8 @@ class Account:
 
         for k, f in manual_funds.items():
             if manual_funds_amount > 0:
-                amounts[k] = (
-                    f.balance * manual_funds_amount / manual_funds_balance
+                amounts[k] = dec_round(
+                    f.balance * manual_funds_amount / manual_funds_balance, 2
                 )
             else:
                 amounts[k] = Decimal(0)
