@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Reporting of distributions now shows account comments and IBAN only if it is set.
 
+### Fixed
+- Make the distribution commands ensure proper arithmetic for money, to avoid stray cents.
+
 ## 0.2.0 - 2024-02-07
 
 ### Added
