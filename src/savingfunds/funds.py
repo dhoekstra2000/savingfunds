@@ -503,7 +503,7 @@ class FundGroup:
         amounts = fix_overdistribution(
             amounts, amount, list(self.funds.keys())
         )
-        if correction_ratio < Decimal(1):
+        if amount / minimal_amount <= Decimal(1):
             amounts = fix_underdistribution(
                 amounts, amount, list(self.funds.keys())
             )
