@@ -38,6 +38,7 @@ from savingfunds.commands.reporting_commands import (
     list_accounts,
     list_funds,
     total_daily_saving_rate,
+    monthly_amount,
 )
 from savingfunds.dataloader import load_accounts_and_funds
 
@@ -82,6 +83,7 @@ cli.add_command(funds_table)
 cli.add_command(total_daily_saving_rate)
 cli.add_command(fund_details)
 cli.add_command(account_details)
+cli.add_command(monthly_amount)
 
 cli.add_command(init)
 cli.add_command(new_account)

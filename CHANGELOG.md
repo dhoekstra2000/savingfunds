@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Flag to deposit command to simultaneuously increase the target by the same amount.
+- Command to get the minimal monthly amount.
 
 ## 0.3.1 - 2024-03-09
 

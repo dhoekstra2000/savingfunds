@@ -1,6 +1,9 @@
 from datetime import date
+from decimal import Decimal
 
 import click
+from rich import print
+from rich.markdown import Markdown
 
 from savingfunds.commands.utils import (
     validate_existing_account_key,
@@ -54,6 +57,41 @@ def total_daily_saving_rate(ctx, when):
     tdsr = funds.daily_saving_rate(when)
 
     print(f"Total daily saving rate: € {moneyfmt(tdsr, 4)}")
+
+
+@click.command()
+@click.pass_context
+@click.argument("year", type=click.INT)
+@click.argument("month", type=click.IntRange(min=1, max=12))
+def monthly_amount(ctx, year, month):
+    "Calculate the minimal monthly amount for the given month."
+    funds = ctx.obj["FUNDS"]
+
+    minimal_monthly_amounts = {
+        f: f.get_minimal_monthly_amount(year, month)
+        for f in funds.funds.values()
+    }
+    total_mma = sum(minimal_monthly_amounts.values())
+
+    markdown = f"""
+Month and year: {str(month):0>2}-{year}
+
+Minimal monthly amount: € {moneyfmt(total_mma)}
+
+Minimal monthly amount per tranche:
+"""
+    markdown += (
+        "\n".join(
+            [
+                f"+ {f.name}: € {moneyfmt(v)}"
+                for f, v in minimal_monthly_amounts.items()
+                if v > Decimal(0)
+            ]
+        )
+        + "\n"
+    )
+
+    print(Markdown(markdown))
 
 
 @click.command()
