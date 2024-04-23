@@ -12,8 +12,9 @@ from savingfunds.funds import BalanceFund, TargetFund
 @click.command()
 @click.argument("key", type=click.STRING)
 @click.argument("amount", type=click.STRING)
+@click.option("--increase-target", is_flag=True)
 @click.pass_context
-def deposit(ctx, key, amount):
+def deposit(ctx, key, amount, increase_target):
     """Deposit money into a fund."""
     funds = ctx.obj["FUNDS"]
 
@@ -25,6 +26,11 @@ def deposit(ctx, key, amount):
     validate_fund_type(fund, BalanceFund)
 
     fund.balance += amount
+
+    if increase_target and not isinstance(fund, TargetFund):
+        print(f"Warning: Fund '{fund.name}' does not have a target.")
+    elif increase_target:
+        fund.target += amount
 
     if not ctx.obj["DRY_RUN"]:
         path = ctx.obj["PATH"]
